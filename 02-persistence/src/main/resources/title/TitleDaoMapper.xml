@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sg.survey.title.TitleDao">
+
+
+    <resultMap id="titleModelListResultMap" type="TitleModel" autoMapping="true">
+        <id column="id" property="id" />
+        <result column="survey_id" property="surveyId" />
+        <result column="title" property="title" />
+        <result column="title_type" property="titleType" />
+        <result column="required" property="required" />
+        <result column="title_sequence" property="titleSequence" />
+    </resultMap>
+
+    <select id="getTitleModelList" resultMap="titleModelListResultMap" parameterType="java.lang.String" >
+        select * from survey_titles where 1=1
+
+        <if test="surveyId != null and surveyId != ''">
+            and survey_id = #{surveyId}
+        </if>
+        <if test="titleType != null and titleType != ''">
+            and title_type = #{titleType}
+        </if>
+
+    </select>
+
+</mapper>

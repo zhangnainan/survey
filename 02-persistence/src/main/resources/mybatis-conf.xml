@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <typeAliases>
+        <typeAlias type="com.sg.survey.SurveyModel" alias="SurveyModel"/>
+        <typeAlias type="com.sg.survey.title.SurveyTextTitleModel" alias="SurveyTextTitleModel"/>
+        <typeAlias type="com.sg.survey.title.SurveySingleTitleModel" alias="SurveySingleTitleModel"/>
+        <typeAlias type="com.sg.survey.title.SurveyTitleModel" alias="SurveyTitleModel"/>
+        <typeAlias type="com.sg.survey.submit.SurveySubmitModel" alias="SurveySubmitModel"/>
+        <typeAlias type="com.sg.survey.submit.SubmitSingleTitleModel" alias="SubmitSingleTitleModel"/>
+        <typeAlias type="com.sg.survey.submit.SubmitMultipleTitleModel" alias="SubmitMultipleTitleModel"/>
+        <typeAlias type="com.sg.survey.submit.SubmitTextTitleModel" alias="SubmitTextTitleModel"/>
+        <typeAlias type="com.sg.survey.SurveyTitleOptionModel" alias="SurveyTitleOptionModel"/>
+        
+        <typeAlias type="com.sg.survey.title.option.OptionModel" alias="OptionModel" />
+        <typeAlias type="com.sg.survey.title.option.OptionSummaryModel" alias="OptionSummaryModel" />
+        <typeAlias type="com.sg.survey.title.option.OptionStatisticsModel" alias="OptionStatisticsModel" />
+        
+        <typeAlias type="com.sg.survey.submit.SubmitOptionModel" alias="SubmitOptionModel" />
+        <typeAlias type="com.sg.survey.submit.SubmitSummaryModel" alias="SubmitSummaryModel" />
+        <typeAlias type="com.sg.survey.submit.SubmitTitleAnswerModel" alias="SubmitTitleAnswerModel" />
+        <typeAlias type="com.sg.survey.SurveyTitleOptionSummaryModel" alias="SurveyTitleOptionSummaryModel" />
+        <typeAlias type="com.sg.survey.SurveyTitleOptionSubmitModel" alias="SurveyTitleOptionSubmitModel" />
+        <typeAlias type="com.sg.survey.SurveyTitleOptionStatisticsModel" alias="SurveyTitleOptionStatisticsModel" />
+        <typeAlias type="com.sg.survey.title.TitleModel" alias="TitleModel"/>
+        <typeAlias type="com.sg.survey.title.TitleInfoModel" alias="TitleInfoModel" />
+        <typeAlias type="com.sg.survey.title.TitleSummaryModel" alias="TitleSummaryModel" />
+        <typeAlias type="com.sg.survey.title.TitleStatisticsModel" alias="TitleStatisticsModel" />
+        
+        
+        <typeAlias type="com.sg.survey.user.UserModel" alias="UserModel" />
+    </typeAliases>
+    <mappers>
+        <mapper resource="SurveyDaoMapper.xml"/>
+        <mapper resource="title/SurveyTextTitleDaoMapper.xml"/>
+        <mapper resource="title/SurveySingleTitleDaoMapper.xml" />
+        <mapper resource="title/SurveyTitleDaoMapper.xml" />
+        <mapper resource="title/TitleDaoMapper.xml" />
+        <mapper resource="title/option/OptionDaoMapper.xml" />
+        <mapper resource="submit/SurveySubmitDaoMapper.xml" />
+        <mapper resource="submit/SubmitSingleTitleDaoMapper.xml" />
+        <mapper resource="submit/SubmitMultipleTitleDaoMapper.xml"/>
+        <mapper resource="submit/SubmitTextTitleDaoMapper.xml" />
+        <mapper resource="SurveyTitleOptionDaoMapper.xml"/>
+        <mapper resource="user/UserDaoMapper.xml" />
+    </mappers>
+</configuration>

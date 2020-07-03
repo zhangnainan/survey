@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sg.survey.SurveyDao">
+
+    <insert id="saveSurvey" parameterType="SurveyModel">
+        insert into survey(id,survey_name,survey_state,creator,notes) values(#{id},#{surveyName},#{surveyState},#{creator},#{notes})
+    </insert>
+
+    <update id="updateSurvey" parameterType="SurveyModel">
+        update survey set survey_name=#{surveyName},survey_state=#{surveyState},creater=#{creator},notes=#{notes} where id=#{id}
+    </update>
+
+    <delete id="deleteSurvey" parameterType="java.lang.String">
+        delete from survey where id=#{surveyId}
+    </delete>
+
+    <resultMap id="queryAllResultMap" type="SurveyModel" autoMapping="true">
+        <id column="id" property="id"/>
+        <result column="survey_name"  property="surveyName"/>
+        <result column="submitter" property="submitter"/>
+        <result column="survey_state" property="surveyState" />
+        <result column="creator" property="creator" />
+        <result column="notes" property="notes" />
+        <association property="submitCount" column="id" select="getSubmitsCountById" />
+    </resultMap>
+    <select id="queryAll" resultMap="queryAllResultMap">
+        select s.id,s.survey_name,s.survey_state,s.creator,s.notes from survey s
+    </select>
+    <!--
+    <select id="queryAll" resultType="SurveyModel">
+        select s.id,s.survey_name as surveyName,s.survey_state as surveyState,s.creator,s.notes,count(1) as submitCount from survey s
+        left join survey_submits ss
+        on s.id = ss.survey_id group by ss.survey_id
+    </select>
+     -->
+    <resultMap id="surveyModelMap" type="SurveyModel">
+        <id column="id" property="id"/>
+        <result column="survey_name"  property="surveyName"/>
+        <result column="submitter" property="submitter"/>
+        <result column="survey_state" property="surveyState" />
+        <result column="creator" property="creator" />
+        <result column="notes" property="notes" />
+    </resultMap>
+
+
+    <select id="queryById" parameterType="java.lang.String" resultMap="surveyModelMap">
+        SELECT id,survey_name as surveyName,survey_state as surveyState,creator,notes from survey where id=#{id}
+    </select>
+
+    <select id="queryByName" parameterType="java.lang.String"  resultMap="surveyModelMap">
+        SELECT id,survey_name as surveyName,survey_state as surveyState,creator,notes from survey where survey_name=#{surveyName}
+    </select>
+
+    <select id="getSubmitsCountById" parameterType="java.lang.String" resultType="int">
+        SELECT count(1)  from survey_submits where survey_id=#{surveyId}
+    </select>
+
+</mapper>

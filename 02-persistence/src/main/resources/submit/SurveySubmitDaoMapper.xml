@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sg.survey.submit.SurveySubmitDao">
+    <insert id="insertSurveySubmit" parameterType="SurveySubmitModel">
+        insert into survey_submits(id,survey_id,submitter) values(#{id},#{surveyId},#{submitter})
+    </insert>
+
+    <insert id="insertSurveySubmitList" parameterType="java.util.List">
+        insert into survey_submits(id,survey_id,submitter) values
+        <foreach collection="list" index="index" item="item" separator="," open="" close="" >
+            (#{item.id},#{item.surveyId},#{item.submitter})
+        </foreach>
+    </insert>
+
+    <select id="querySurveySubmitListBySurveyId" parameterType="java.lang.String" resultType="SurveySubmitModel">
+        select * from survey_submits where survey_id=#{surveyId}
+    </select>
+</mapper>

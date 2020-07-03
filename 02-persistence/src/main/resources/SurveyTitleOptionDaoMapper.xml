@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sg.survey.SurveyTitleOptionDao">
+    <resultMap id="SurveyTitleOptionResult" type="SurveyTitleOptionModel" autoMapping="true">
+        <id column="id" property="id"/>
+        <result column="survey_name"  property="surveyName"/>
+        <result column="survey_state" property="surveyState"/>
+        <result column="creator" property="creator"/>
+        <result column="notes" property="notes"/>
+        <collection property="titleList" javaType="java.util.List" ofType="TitleInfoModel" >
+            <id column="titleId" property="id"/>
+            <result column="survey_id" property="surveyId"/>
+            <result column="title" property="title"/>
+            <result column="title_type" property="titleType"/>
+            <result column="required" property="required"/>
+            <result column="title_sequence" property="titleSequence"/>
+            <!-- <result column="text" property="text"/> -->
+            <collection property="optionModelList" javaType="java.util.List" ofType="OptionModel" >
+                <id column="optionId" property="id"/>
+                <result column="title_id" property="titleId" />
+                <result column="option_name" property="optionName"/>
+                <result column="option_sequence" property="optionSequence"/>
+            </collection>
+        </collection>
+    </resultMap>
+
+    <select id="getSurveyTitleOptionModelById" parameterType="java.lang.String" resultMap="SurveyTitleOptionResult">
+        select s.id,s.survey_name,s.survey_state,s.creator,s.notes,
+        st.id as titleId,st.survey_id,st.title,st.title_type,st.required,st.title_sequence,null as text,
+        tos.id as optionId,tos.title_id,tos.option_name,tos.option_sequence
+        from survey s
+        left join survey_titles st on s.id=st.survey_id
+        left join title_options tos on st.id = tos.title_id
+        where s.id = #{surveyId}
+        order by st.title_sequence,tos.option_sequence
+    </select>
+
+    <resultMap id="SurveyStatisticsResult" type="SurveyTitleOptionStatisticsModel" autoMapping="true">
+        <id column="id" property="id"/>
+        <result column="survey_name"  property="surveyName"/>
+        <result column="survey_state" property="surveyState"/>
+        <result column="creator" property="creator"/>
+        <result column="notes" property="notes"/>
+        <collection property="titleList" javaType="java.util.List" ofType="TitleStatisticsModel" >
+            <id column="titleId" property="id"/>
+            <result column="survey_id" property="surveyId"/>
+            <result column="title" property="title"/>
+            <result column="title_type" property="titleType"/>
+            <result column="required" property="required"/>
+            <result column="title_sequence" property="titleSequence"/>
+            <collection property="optionModelList" javaType="java.util.List" ofType="OptionStatisticsModel" >
+                <id column="optionId" property="id"/>
+                <result column="title_id" property="titleId" />
+                <result column="option_name" property="optionName"/>
+                <result column="option_sequence" property="optionSequence"/>
+            </collection>
+        </collection>
+    </resultMap>
+
+    <select id="getSurveyStatistics" parameterType="java.lang.String" resultMap="SurveyStatisticsResult">
+        select s.id,s.survey_name,s.survey_state,s.creator,s.notes,
+        st.id as titleId,st.survey_id,st.title,st.title_type,st.required,st.title_sequence,
+        tos.id as optionId,tos.title_id,tos.option_name,tos.option_sequence
+        from survey s
+        left join survey_titles st on s.id=st.survey_id
+        left join title_options tos on st.id = tos.title_id
+        where s.id = #{surveyId}
+        order by st.title_sequence,tos.option_sequence
+    </select>
+
+    <resultMap id="SurveyTitleOptionSummaryResult" type="SurveyTitleOptionSummaryModel" autoMapping="true">
+        <id column="id" property="id"/>
+        <result column="survey_name"  property="surveyName"/>
+        <result column="survey_state" property="surveyState"/>
+        <result column="creator" property="creator"/>
+        <result column="notes" property="notes"/>
+        <!--<association property="submitsCount" column="id" select="getSubmitsCount" /> -->
+        <!--<association property="submitSummaryModelList" column="id" javaType="SubmitSummaryModel" select="getSubmitSummaryList" />-->
+        <collection property="submitSummaryModelList" column="id" select="getSubmitSummaryList" >
+            <id column="submitId" property="id"/>
+            <result column="survey_id"  property="surveyId"/>
+            <result column="submitter" property="submitter"/>
+            <collection property="submitTitleAnswerModelList" javaType="java.util.List" ofType="SubmitTitleAnswerModel" >
+                <id column="id" property="id"/>
+                <result column="submit_id" property="submitId"/>
+                <result column="title_id" property="titleId"/>
+                <result column="answer" property="answer"/>
+            </collection>
+        </collection>
+        <collection property="titleList" javaType="java.util.List" ofType="TitleSummaryModel" >
+            <id column="titleId" property="id"/>
+            <result column="survey_id" property="surveyId"/>
+            <result column="title" property="title"/>
+            <result column="title_type" property="titleType"/>
+            <result column="required" property="required"/>
+            <result column="title_sequence" property="titleSequence"/>
+            <collection  property="submitTitleAnswerModelList"  ofType="SubmitTitleAnswerModel">
+                <id column="answerId" property="id" />
+                <result column="answerTitleId" property="titleId" />
+                <result column="answerSubmitId" property="submitId" />
+                <result column="answer" property="answer" />
+            </collection>
+            <!-- <result column="answer" property="answerList" javaType="java.lang.String"/> -->
+            <collection property="optionModelList" javaType="java.util.List" ofType="OptionSummaryModel" >
+                <id column="optionId" property="id"/>
+                <result column="title_id" property="titleId" />
+                <result column="option_name" property="optionName"/>
+                <result column="option_sequence" property="optionSequence"/>
+            </collection>
+        </collection>
+    </resultMap>
+
+
+    
+    <select id="getSurveySubmitSummary" parameterType="java.lang.String"  resultMap="SurveyTitleOptionSummaryResult">
+        select s.id,s.survey_name,s.survey_state,s.creator,s.notes,
+                st.id as titleId,st.survey_id,st.title,st.title_type,st.required,st.title_sequence,
+                tos.id as optionId,tos.title_id,tos.option_name,tos.option_sequence,ss.id as answerId,ss.title_id as answerTitleId,ss.submit_id as answerSubmitId,ss.option_id as answer
+                from survey s
+                left join survey_titles st on s.id=st.survey_id
+                left join title_options tos on st.id = tos.title_id
+                left join submits_single ss on ss.option_id=tos.id
+                where s.id = #{surveyId}
+                and st.title_type='0'
+                union all
+        select s.id,s.survey_name,s.survey_state,s.creator,s.notes,
+                st.id as titleId,st.survey_id,st.title,st.title_type,st.required,st.title_sequence,
+                tos.id as optionId,tos.title_id,tos.option_name,tos.option_sequence,sm.id as answerId,sm.title_id as answerTitleId,sm.submit_id as answerSubmitId,sm.option_id as answer
+                from survey s
+                left join survey_titles st on s.id=st.survey_id
+                left join title_options tos on st.id = tos.title_id
+                left join submits_multiple sm on sm.option_id=tos.id
+                where s.id = #{surveyId}
+                and st.title_type='1'
+                union all
+        select s.id,s.survey_name,s.survey_state,s.creator,s.notes,
+                st.id as titleId,st.survey_id,st.title,st.title_type,st.required,st.title_sequence,
+                tos.id as optionId,tos.title_id,tos.option_name,tos.option_sequence,subt.id as answerId,subt.title_id as answerTitleId,subt.submit_id as answerSubmitId,subt.text as answer
+                from survey s
+                left join survey_titles st on s.id=st.survey_id
+                left join title_options tos on st.id = tos.title_id
+                left join submits_text subt on subt.title_id=st.id
+                where s.id = #{surveyId}
+                and st.title_type='2';
+    </select>
+
+
+    <resultMap id="SubmitSummaryResult" type="SubmitSummaryModel" autoMapping="true">
+        <id column="submitId" property="id"/>
+        <result column="survey_id"  property="surveyId"/>
+        <result column="submitter" property="submitter"/>
+        <collection property="submitTitleAnswerModelList" javaType="java.util.List" ofType="SubmitTitleAnswerModel" >
+            <id column="id" property="id"/>
+            <result column="submit_id" property="submitId"/>
+            <result column="title_id" property="titleId"/>
+            <result column="answer" property="answer"/>
+        </collection>
+    </resultMap>
+    <select id="getSubmitSummaryList" parameterType="java.lang.String" resultMap="SubmitSummaryResult">
+        select ss.id as submitId,ss.survey_id,ss.submitter,st.id,st.submit_id,st.title_id,st.text as answer  from  survey_submits ss
+	    left join submits_text st on st.submit_id = ss.id
+	    where ss.survey_id=#{surveyId}
+        union all
+        select ss.id as submitId,ss.survey_id,ss.submitter,ssg.id,ssg.submit_id,ssg.title_id,ssg.option_id as answer  from  survey_submits ss
+	    left join submits_single ssg on ssg.submit_id = ss.id
+	    where ss.survey_id=#{surveyId}
+        union all
+        select ss.id as submitId,ss.survey_id,ss.submitter,sm.id,sm.submit_id,sm.title_id,sm.option_id as answer  from  survey_submits ss
+	    left join submits_multiple sm on sm.submit_id = ss.id
+	    where ss.survey_id=#{surveyId}
+    </select>
+
+
+    <resultMap id="SurveyTitleOptionSubmitResult" type="SurveyTitleOptionSubmitModel" autoMapping="true">
+        <id column="submitId" property="submitId"/>
+        <result column="id" property="id" />
+        <result column="survey_name"  property="surveyName"/>
+        <result column="survey_state" property="surveyState"/>
+        <result column="creator" property="creator"/>
+        <result column="notes" property="notes"/>
+        <collection property="titleList" javaType="java.util.List" ofType="TitleInfoModel" >
+            <id column="titleId" property="id"/>
+            <result column="survey_id" property="surveyId"/>
+            <result column="title" property="title"/>
+            <result column="title_type" property="titleType"/>
+            <result column="required" property="required"/>
+            <result column="title_sequence" property="titleSequence"/>
+            <result column="text" property="text"/>
+            <collection property="optionModelList" javaType="java.util.List" ofType="OptionModel" >
+                <id column="optionId" property="id"/>
+                <result column="title_id" property="titleId" />
+                <result column="option_name" property="optionName"/>
+                <result column="option_sequence" property="optionSequence"/>
+            </collection>
+        </collection>
+    </resultMap>
+
+    <select id="getSurveySubmitDetailList" parameterType="java.lang.String" resultMap="SurveyTitleOptionSubmitResult">
+        select ss.id as submitId,ss.survey_id,ss.submitter,st.id,st.submit_id,st.text,s.id,s.survey_name,s.survey_state,s.creator,s.notes,stles.id as titleId,stles.title,stles.title_type,stles.title_sequence,stles.required,tos.id as optionId,tos.title_id,tos.option_name,tos.option_sequence from  survey_submits ss
+             left join submits_text st on st.submit_id = ss.id
+             left join survey s  on s.id = ss.survey_id
+             left join survey_titles stles on stles.id = st.title_id
+             left join title_options tos on st.id = tos.title_id
+             where ss.survey_id = #{surveyId}
+             union all
+        select ss.id as submitId,ss.survey_id,ss.submitter,ssg.id,ssg.submit_id,'' as text,s.id,s.survey_name,s.survey_state,s.creator,s.notes,stles.id as titleId,stles.title,stles.title_type,stles.title_sequence,stles.required,tos.id as optionId,tos.title_id,tos.option_name,tos.option_sequence  from  survey_submits ss
+             left join submits_single ssg on ssg.submit_id = ss.id
+             left join survey s  on s.id = ss.survey_id
+             left join survey_titles stles on stles.id = ssg.title_id
+             left join title_options tos on tos.id = ssg.option_id
+             where ss.survey_id = #{surveyId}
+             union all
+        select ss.id as submitId,ss.survey_id,ss.submitter,sm.id,sm.submit_id,'' as text ,s.id,s.survey_name,s.survey_state,s.creator,s.notes,stles.id  as titleId,stles.title,stles.title_type,stles.title_sequence,stles.required,tos.id as optionId,tos.title_id,tos.option_name,tos.option_sequence  from  survey_submits ss
+             left join submits_multiple sm on sm.submit_id = ss.id
+             left join survey s  on s.id = ss.survey_id
+             left join survey_titles stles on stles.id = sm.title_id
+             left join title_options tos on tos.id = sm.option_id
+             where ss.survey_id = #{surveyId}
+    </select>
+
+
+    <select id="getSubmitsCount" parameterType="java.lang.String" resultType="int" >
+        select count(1) from survey_submits where survey_id = #{surveyId}
+    </select>
+
+
+
+</mapper>
