@@ -16,4 +16,8 @@
     <select id="querySurveySubmitListBySurveyId" parameterType="java.lang.String" resultType="SurveySubmitModel">
         select * from survey_submits where survey_id=#{surveyId}
     </select>
+
+    <delete id="deleteSurveySubmitsBySurveyId" parameterType="java.lang.String">
+        delete from survey_submits where survey_id=#{surveyId}
+    </delete>
 </mapper>

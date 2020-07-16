@@ -10,7 +10,7 @@
         <result column="title" property="title" />
         <result column="title_type" property="titleType" />
         <result column="required" property="required" />
-        <result column="title_sequence" property="titleSequence" />
+        <result column="title_sequence" property="titleSequence"/>
     </resultMap>
 
     <select id="getTitleModelList" resultMap="titleModelListResultMap" parameterType="java.lang.String" >
@@ -24,5 +24,61 @@
         </if>
 
     </select>
+
+    <select id="getAllTitleModelList" resultMap="titleModelListResultMap" parameterType="java.lang.String">
+        select * from survey_titles where survey_id=#{surveyId} order by title_sequence
+    </select>
+
+    <select id="queryTitleModel" resultMap="titleModelListResultMap" parameterType="java.lang.String">
+        select * from survey_titles where survey_id=#{surveyId} and title=#{titleName}
+    </select>
+
+    <resultMap id="submitTitleMap" type="SubmitTitleModel" autoMapping="true">
+        <id column="id" property="id" />
+        <result column="submit_id" property="submitId" />
+        <result column="title_id" property="titleId" />
+    </resultMap>
+    <select id="querySubmitTitleList"  parameterType="java.lang.String" resultMap="submitTitleMap">
+        select id,submit_id,title_id from
+        <choose>
+            <when test="titleType=='0'.toString()">
+                submits_single
+            </when>
+            <when test="titleType=='1'.toString()">
+                submits_multiple
+            </when>
+            <otherwise>
+                submits_text
+            </otherwise>
+        </choose>
+
+        where title_id=#{titleId}
+    </select>
+
+
+
+    <insert id="saveTitleModel" parameterType="TitleModel">
+        insert into survey_titles(id,survey_id,title,title_type,required,title_sequence) values(#{id},#{surveyId},#{title},#{titleType},#{required},${titleSequence})
+    </insert>
+
+    <insert id="updateTitleModel" parameterType="TitleModel">
+        update survey_titles set title=#{title},title_sequence=#{titleSequence},title_type=#{titleType},required=#{required} where id=#{id}
+    </insert>
+
+    <delete id="deleteTitleModel" parameterType="java.lang.String" >
+        delete from survey_titles where id=#{titleId}
+    </delete>
+
+    <delete id="deleteTitleModelList" parameterType="java.util.List">
+        <foreach collection="list" close="" open="" index="index" item="titleModel" separator=";">
+            delete from survey_titles where id=#{titleModel.id}
+        </foreach>
+    </delete>
+
+    <update id="updateTitleModelSequence" parameterType="java.util.List">
+        <foreach collection="list" open="" close="" separator=";" item="item" index="index">
+            update survey_titles set title_sequence=${item.titleSequence} where id=#{item.id}
+        </foreach>
+    </update>
 
 </mapper>

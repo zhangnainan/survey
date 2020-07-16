@@ -67,6 +67,22 @@ public interface SurveyService {
      */
     public Result saveSurvey(SurveyModel surveyModel);
 
+    /**
+     * 更新surveyModel
+     *
+     * @param surveyModel
+     * @return
+     */
+    public Result updateSurvey(SurveyModel surveyModel);
+
+    /**
+     * 删除Survey
+     *
+     * @param surveyId
+     * @return
+     */
+    public Result deleteSurvey(String surveyId);
+
 //    /**
 //     * 获取问卷的详细信息
 //     *

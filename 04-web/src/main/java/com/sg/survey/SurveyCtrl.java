@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.Map;
 
 
 /**
@@ -93,5 +94,25 @@ public class SurveyCtrl{
         return resultStr;
     }
 
+    @ResponseBody
+    @RequestMapping(value = "/update/survey",method = RequestMethod.POST,produces = "text/plain;charset=utf-8")
+    public String updateSurvey(@RequestBody  SurveyModel surveyModel){
+
+        Result result = surveyService.updateSurvey(surveyModel);
+        String resultStr = JSON.toJSONString(result);
+
+        return resultStr;
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/delete/survey",method = RequestMethod.DELETE,produces = "text/plain;charset=utf-8")
+    public String deleteSurvey(@RequestBody Map<String,Object> paramsMap){
+
+        String surveyId = paramsMap.get("surveyId").toString();
+        Result result = surveyService.deleteSurvey(surveyId);
+        String resultStr = JSON.toJSONString(result);
+
+        return resultStr;
+    }
 
 }

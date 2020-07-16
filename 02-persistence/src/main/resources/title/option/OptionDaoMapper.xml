@@ -14,14 +14,25 @@
         </foreach>
     </insert>
 
+    <delete id="deleteOptionModel" parameterType="java.lang.String">
+        DELETE from title_options where id=#{optionId}
+    </delete>
+
     <delete id="deleteOptionByTitleId" parameterType="java.lang.String">
         delete from title_options where title_id=#{titleId}
     </delete>
 
     <delete id="deleteOptionByTitleIds" parameterType="java.util.List">
-        delete from title_options where title_id in
-        <foreach collection="list" open="(" close=")" separator="," item="titleId" index="index">
-            #{titleId}
+
+        <foreach collection="list" open="" close="" separator=";" item="titleModel" index="index">
+            delete from title_options where title_id=#{titleModel.id}
+        </foreach>
+    </delete>
+
+    <delete id="deleteOptionModelList" parameterType="java.util.List">
+        delete from title_options where id in
+        <foreach collection="list" open="(" close=")" separator="," item="item" index="index">
+            #{item.id}
         </foreach>
     </delete>
 
@@ -40,6 +51,28 @@
         <foreach collection="list" separator="," open="(" close=")" item="item" index="index">
             #{item.id}
         </foreach>
+    </select>
+
+
+    <resultMap id="submitOptionMap" type="SubmitOptionModel" autoMapping="true">
+        <id column="id" property="id" />
+        <result column="submit_id" property="submitId" />
+        <result column="title_id" property="titleId" />
+        <result column="option_id" property="optionId" />
+    </resultMap>
+    <select id="querySubmitOptionList"  parameterType="java.lang.String" resultMap="submitOptionMap">
+        select id,submit_id,title_id,option_id from
+        <choose>
+            <when test="titleType=='0'.toString()">
+                submits_single
+            </when>
+            <otherwise>
+                submits_multiple
+            </otherwise>
+
+        </choose>
+
+        where option_id=#{optionId}
     </select>
 
 

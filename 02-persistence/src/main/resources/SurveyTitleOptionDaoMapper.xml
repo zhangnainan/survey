@@ -197,6 +197,27 @@
     </resultMap>
 
     <select id="getSurveySubmitDetailList" parameterType="java.lang.String" resultMap="SurveyTitleOptionSubmitResult">
+        select ss.id as submitId,ss.submitter,st.id,st.submit_id,st.text,s.id,s.survey_name,s.survey_state,s.creator,s.notes,stles.id as titleId,stles.title,stles.title_type,stles.title_sequence,stles.required,tos.id as optionId,tos.title_id,tos.option_name,tos.option_sequence from  survey_submits ss
+        left join submits_text st on st.submit_id = ss.id
+        left join survey s  on s.id = ss.survey_id
+        left join survey_titles stles on stles.id = st.title_id
+        left join title_options tos on st.id = tos.title_id
+        where ss.survey_id = #{surveyId}
+        union all
+        select ss.id as submitId,ss.submitter,ssg.id,ssg.submit_id,null as text,s.id,s.survey_name,s.survey_state,s.creator,s.notes,stles.id as titleId,stles.title,stles.title_type,stles.title_sequence,stles.required,tos.id as optionId,tos.title_id,tos.option_name,tos.option_sequence  from  survey_submits ss
+        left join submits_single ssg on ssg.submit_id = ss.id
+        left join survey s  on s.id = ss.survey_id
+        left join survey_titles stles on stles.id = ssg.title_id
+        left join title_options tos on tos.id = ssg.option_id
+        where ss.survey_id = #{surveyId}
+        union all
+        select ss.id as submitId,ss.submitter,sm.id,sm.submit_id,null as text ,s.id,s.survey_name,s.survey_state,s.creator,s.notes,stles.id  as titleId,stles.title,stles.title_type,stles.title_sequence,stles.required,tos.id as optionId,tos.title_id,tos.option_name,tos.option_sequence  from  survey_submits ss
+        left join submits_multiple sm on sm.submit_id = ss.id
+        left join survey s  on s.id = ss.survey_id
+        left join survey_titles stles on stles.id = sm.title_id
+        left join title_options tos on tos.id = sm.option_id
+        where ss.survey_id = #{surveyId}
+        <!--
         select ss.id as submitId,ss.survey_id,ss.submitter,st.id,st.submit_id,st.text,s.id,s.survey_name,s.survey_state,s.creator,s.notes,stles.id as titleId,stles.title,stles.title_type,stles.title_sequence,stles.required,tos.id as optionId,tos.title_id,tos.option_name,tos.option_sequence from  survey_submits ss
              left join submits_text st on st.submit_id = ss.id
              left join survey s  on s.id = ss.survey_id
@@ -204,19 +225,20 @@
              left join title_options tos on st.id = tos.title_id
              where ss.survey_id = #{surveyId}
              union all
-        select ss.id as submitId,ss.survey_id,ss.submitter,ssg.id,ssg.submit_id,'' as text,s.id,s.survey_name,s.survey_state,s.creator,s.notes,stles.id as titleId,stles.title,stles.title_type,stles.title_sequence,stles.required,tos.id as optionId,tos.title_id,tos.option_name,tos.option_sequence  from  survey_submits ss
+        select ss.id as submitId,ss.survey_id,ss.submitter,ssg.id,ssg.submit_id,null as text,s.id,s.survey_name,s.survey_state,s.creator,s.notes,stles.id as titleId,stles.title,stles.title_type,stles.title_sequence,stles.required,tos.id as optionId,tos.title_id,tos.option_name,tos.option_sequence  from  survey_submits ss
              left join submits_single ssg on ssg.submit_id = ss.id
              left join survey s  on s.id = ss.survey_id
              left join survey_titles stles on stles.id = ssg.title_id
              left join title_options tos on tos.id = ssg.option_id
              where ss.survey_id = #{surveyId}
              union all
-        select ss.id as submitId,ss.survey_id,ss.submitter,sm.id,sm.submit_id,'' as text ,s.id,s.survey_name,s.survey_state,s.creator,s.notes,stles.id  as titleId,stles.title,stles.title_type,stles.title_sequence,stles.required,tos.id as optionId,tos.title_id,tos.option_name,tos.option_sequence  from  survey_submits ss
+        select ss.id as submitId,ss.survey_id,ss.submitter,sm.id,sm.submit_id,null as text ,s.id,s.survey_name,s.survey_state,s.creator,s.notes,stles.id  as titleId,stles.title,stles.title_type,stles.title_sequence,stles.required,tos.id as optionId,tos.title_id,tos.option_name,tos.option_sequence  from  survey_submits ss
              left join submits_multiple sm on sm.submit_id = ss.id
              left join survey s  on s.id = ss.survey_id
              left join survey_titles stles on stles.id = sm.title_id
              left join title_options tos on tos.id = sm.option_id
              where ss.survey_id = #{surveyId}
+        -->
     </select>
 
 

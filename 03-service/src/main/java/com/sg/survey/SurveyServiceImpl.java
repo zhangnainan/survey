@@ -34,6 +34,9 @@ public class SurveyServiceImpl implements SurveyService {
     private SurveyTitleDao surveyTitleDao;
 
     @Autowired
+    private TitleDao titleDao;
+
+    @Autowired
     private OptionDao optionDao;
 
     @Autowired
@@ -249,6 +252,123 @@ public class SurveyServiceImpl implements SurveyService {
             result.setMessage(Message.Error.getType());
         }
 
+
+        return result;
+    }
+
+    @Override
+    public Result updateSurvey(SurveyModel surveyModel) {
+        Result<SurveyModel> result = new Result<>();
+
+        if(Validator.isEmpty(surveyModel) || Validator.isEmpty(surveyModel.getSurveyName())){
+            result.setMessage(Message.NotEmpty.getType());
+            return result;
+        }
+
+        try{
+            List<SurveyModel> surveyModelList = surveyDao.queryByName(surveyModel.getSurveyName());
+            if(!Validator.isEmpty(surveyModelList)){
+                for(SurveyModel tempSurveyModel : surveyModelList){
+                    if (!tempSurveyModel.getId().equals(surveyModel.getId())) {
+                        result.setMessage(Message.Exist.getType());
+                        return result;
+                    }
+                }
+            }
+
+            int rows = surveyDao.updateSurvey(surveyModel);
+            if(rows <= 0){
+                result.setMessage(Message.UpdateError.getType());
+            }else{
+                result.setData(surveyModel);
+                result.setMessage(Message.Success.getType());
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            result.setMessage(Message.Error.getType());
+        }
+
+        return result;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED,rollbackFor = Exception.class)
+    public Result deleteSurvey(String surveyId) {
+        Result result = new Result();
+        if(Validator.isEmpty(surveyId)){
+            result.setMessage(Message.NotEmpty.getType());
+            return result;
+        }
+        // 获取titleList
+        List<TitleModel> titleModelList = titleDao.getAllTitleModelList(surveyId);
+
+        // 删除survey
+        int rows = surveyDao.deleteSurvey(surveyId);
+        if(rows < 0){
+            result.setMessage(Message.DeleteError.getType());
+            return result;
+        }
+
+        //删除surveySubmit
+        rows = surveySubmitDao.deleteSurveySubmitsBySurveyId(surveyId);
+        if(rows < 0){
+            result.setMessage(Message.DeleteError.getType());
+            return result;
+        }
+
+        if(!Validator.isEmpty(titleModelList)){
+            List<TitleModel> singleTitleModelList = new ArrayList<>();
+            List<TitleModel> multipleTitleModelList = new ArrayList<>();
+            List<TitleModel> textTitleModelList = new ArrayList<>();
+            for(int i = 0; i < titleModelList.size(); i++){
+                if(titleModelList.get(i).getTitleType().equals(TitleType.SingleTitle.getVal())){
+                    singleTitleModelList.add(titleModelList.get(i));
+                }else if(titleModelList.get(i).getTitleType().equals(TitleType.MultipleTitle.getVal())){
+                    multipleTitleModelList.add(titleModelList.get(i));
+                }else{
+                    textTitleModelList.add(titleModelList.get(i));
+                }
+            }
+
+            // 删除titleModel
+            rows = titleDao.deleteTitleModelList(titleModelList);
+            if(rows < 0){
+                result.setMessage(Message.DeleteError.getType());
+                return result;
+            }
+            // 删除optionModel
+            rows = optionDao.deleteOptionByTitleIds(titleModelList);
+            if(rows < 0){
+                result.setMessage(Message.DeleteError.getType());
+                return result;
+            }
+            // 删除singleSubmits
+            if(!Validator.isEmpty(singleTitleModelList)){
+                rows = submitSingleTitleDao.deleteSubmitSingleByTitleId(singleTitleModelList);
+                if(rows < 0){
+                    result.setMessage(Message.DeleteError.getType());
+                    return result;
+                }
+            }
+            // 删除multipleSubmits
+            if(!Validator.isEmpty(multipleTitleModelList)){
+                rows = submitMultipleTitleDao.deleteSubmitMultipleByTitleId(multipleTitleModelList);
+                if(rows < 0){
+                    result.setMessage(Message.DeleteError.getType());
+                    return result;
+                }
+            }
+            // 删除textSubmits
+            if(!Validator.isEmpty(textTitleModelList)){
+                rows = submitTextTitleDao.deleteSubmitTextByTitleId(textTitleModelList);
+                if(rows < 0){
+                    result.setMessage(Message.DeleteError.getType());
+                    return result;
+                }
+            }
+
+        }
+        result.setMessage(Message.Success.getType());
 
         return result;
     }

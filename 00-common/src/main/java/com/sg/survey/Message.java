@@ -22,10 +22,15 @@ public enum Message {
     /* 调用服务失败 */
     ServiceError("error.service"),
 
+
+    ParameterIllegal("error.parameter.illegal"),
+
     /**
      * 非法输入
      */
     InputIllegal("error.input.illegal"),
+
+    Repeat("error.repeat"),
 
     /**
      * 信息已经存在
@@ -39,6 +44,8 @@ public enum Message {
      */
     AddError("error.add"),
 
+
+
     /**
      * 更新失败
      */
@@ -48,6 +55,9 @@ public enum Message {
      * 删除失败
      */
     DeleteError("error.delete"),
+
+
+    AnswerExist("error.answer.exist"),
 
     /**
      * 无法查询到相关记录

@@ -12,4 +12,6 @@ public interface SurveySubmitDao {
     public int insertSurveySubmitList(List<SurveySubmitModel> surveySubmitModelList);
 
     public List<SurveySubmitModel> querySurveySubmitListBySurveyId(String surveyId);
+
+    public int deleteSurveySubmitsBySurveyId(String surveyId);
 }

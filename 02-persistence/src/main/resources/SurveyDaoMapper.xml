@@ -8,7 +8,7 @@
     </insert>
 
     <update id="updateSurvey" parameterType="SurveyModel">
-        update survey set survey_name=#{surveyName},survey_state=#{surveyState},creater=#{creator},notes=#{notes} where id=#{id}
+        update survey set survey_name=#{surveyName},survey_state=#{surveyState},creator=#{creator},notes=#{notes} where id=#{id}
     </update>
 
     <delete id="deleteSurvey" parameterType="java.lang.String">

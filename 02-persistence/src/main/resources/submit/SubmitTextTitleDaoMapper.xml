@@ -15,6 +15,13 @@
     <delete id="deleteSubmitTextTitleBySubmitId" parameterType="java.lang.String">
         delete from submits_text where submit_id=#{submitId}
     </delete>
+
+    <delete id="deleteSubmitTextByTitleId" parameterType="java.util.List">
+        <foreach collection="list" separator=";" item="titleModel" open="" close="" index="index">
+            delete from submits_text where title_id=#{titleModel.id}
+        </foreach>
+    </delete>
+
     <select id="querySubmitTextTitleListBySubmitId" parameterType="java.lang.String" resultType="SubmitTextTitleModel">
         select * from submits_text where submit_id=#{submitId}
     </select>

@@ -17,6 +17,13 @@
     <delete id="deleteSubmitMultipleTitleBySubmitId" parameterType="java.lang.String">
         delete from submits_multiple where submit_id=#{submitId}
     </delete>
+
+    <delete id="deleteSubmitMultipleByTitleId" parameterType="java.util.List">
+        <foreach collection="list" separator=";" item="titleModel" open="" close="" index="index">
+            delete from submits_multiple where title_id=#{titleModel.id}
+        </foreach>
+    </delete>
+
     <select id="querySubmitMultipleTitleListBySubmitId" parameterType="java.lang.String" resultType="SubmitMultipleTitleModel">
         select * from submits_multiple where submit_id=#{submitId}
     </select>

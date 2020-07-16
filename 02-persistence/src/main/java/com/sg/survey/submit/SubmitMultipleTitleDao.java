@@ -1,5 +1,7 @@
 package com.sg.survey.submit;
 
+import com.sg.survey.title.TitleModel;
+
 import java.util.List;
 
 /**
@@ -12,6 +14,8 @@ public interface SubmitMultipleTitleDao {
     public int insertSubmitMultipleTitleList(List<SubmitOptionModel> submitOptionModelList);
 
     public int deleteSubmitBySubmitId(String submitId);
+
+    public int deleteSubmitMultipleByTitleId(List<TitleModel> titleModelList);
 
     public List<SubmitMultipleTitleModel> querySubmitMultipleTitleListBySubmitId(String submitId);
 

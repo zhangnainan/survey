@@ -25,7 +25,7 @@ import java.util.UUID;
         // 创建问卷
         //createSurvey();
         // 查询问卷信息
-        querySurveyTitleOptionModelTest();
+        //querySurveyTitleOptionModelTest();
         //提交问卷
         //submitSurvey();
         //查询汇总结果
@@ -39,6 +39,7 @@ import java.util.UUID;
         //getSurveyStatistics();
         //根据调查名称查询问卷
         //querySurveyByName();
+        querySubmitTitleList();
     }
 
     private static void md5Test(){
@@ -86,6 +87,11 @@ import java.util.UUID;
         List<SurveyModel> surveyModelList = surveyDao.queryByName("ssss");
     }
 
+    private static void querySubmitTitleList(){
+        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("spring-dao.xml");
+        TitleDao titleDao = (TitleDao) applicationContext.getBean("titleDaoMapper");
+        List<SubmitTitleModel> submitTitleModelList = titleDao.querySubmitTitleList("54a8d096-ea33-424b-a84a-efde735cb6a0","0");
+    }
     private static void createSurvey(){
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("spring-dao.xml");
         SurveyDao surveyDao = (SurveyDao) applicationContext.getBean("surveyDaoMapper");

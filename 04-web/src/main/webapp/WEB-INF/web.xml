@@ -17,6 +17,7 @@
   <listener>
     <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
   </listener>
+
   <!-- 字符过滤，保存中文的时候用到 -->
   <filter>
     <filter-name>encodingFilter</filter-name>
@@ -34,17 +35,19 @@
     <filter-name>encodingFilter</filter-name>
     <url-pattern>/*</url-pattern>
   </filter-mapping>
-  <!-- 配置session -->
+
   <!--
   <filter>
-    <filter-name>openSession</filter-name>
-    <filter-class>org.springframework.orm.hibernate4.support.OpenSessionInViewFilter</filter-class>
+    <filter-name>HiddenHttpMethodFilter</filter-name>
+    <filter-class>org.springframework.web.filter.HiddenHttpMethodFilter</filter-class>
   </filter>
   <filter-mapping>
-    <filter-name>openSession</filter-name>
+    <filter-name>HiddenHttpMethodFilter</filter-name>
+    <servlet-name>dispatcherServlet</servlet-name>
     <url-pattern>/*</url-pattern>
   </filter-mapping>
   -->
+
   <servlet>
     <servlet-name>dispatcherServlet</servlet-name>
     <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
@@ -58,4 +61,39 @@
     <servlet-name>dispatcherServlet</servlet-name>
     <url-pattern>/</url-pattern>
   </servlet-mapping>
+  <!-- 配置session -->
+  <!--
+  <filter>
+    <filter-name>openSession</filter-name>
+    <filter-class>org.springframework.orm.hibernate4.support.OpenSessionInViewFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>openSession</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+  -->
+
+
+
+  <!--解决DELETE请求接收不到参数的配置 -->
+<!--
+  <filter>
+    <filter-name>HttpPutFormContentFilter</filter-name>
+    <filter-class>org.springframework.web.filter.HttpPutFormContentFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>HttpPutFormContentFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+
+  <filter>
+    <filter-name>HiddenHttpMethodFilter</filter-name>
+    <filter-class>org.springframework.web.filter.HiddenHttpMethodFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>HiddenHttpMethodFilter</filter-name>
+    <servlet-name>dispatcherServlet</servlet-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+  -->
 </web-app>
