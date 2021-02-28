@@ -33,6 +33,10 @@
         select * from survey_titles where survey_id=#{surveyId} and title=#{titleName}
     </select>
 
+    <select id="queryNameColumnBySurveyId" resultMap="titleModelListResultMap" parameterType="java.lang.String">
+        select * from survey_titles where survey_id=#{surveyId} and is_name_column='1'
+    </select>
+
     <resultMap id="submitTitleMap" type="SubmitTitleModel" autoMapping="true">
         <id column="id" property="id" />
         <result column="submit_id" property="submitId" />
@@ -58,11 +62,11 @@
 
 
     <insert id="saveTitleModel" parameterType="TitleModel">
-        insert into survey_titles(id,survey_id,title,title_type,required,title_sequence) values(#{id},#{surveyId},#{title},#{titleType},#{required},${titleSequence})
+        insert into survey_titles(id,survey_id,title,title_type,required,is_name_column,title_sequence) values(#{id},#{surveyId},#{title},#{titleType},#{required},#{isNameColumn},${titleSequence})
     </insert>
 
     <insert id="updateTitleModel" parameterType="TitleModel">
-        update survey_titles set title=#{title},title_sequence=#{titleSequence},title_type=#{titleType},required=#{required} where id=#{id}
+        update survey_titles set title=#{title},title_sequence=#{titleSequence},title_type=#{titleType},required=#{required},is_name_column=#{isNameColumn} where id=#{id}
     </insert>
 
     <delete id="deleteTitleModel" parameterType="java.lang.String" >

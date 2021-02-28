@@ -22,7 +22,14 @@
         </foreach>
     </delete>
 
-    <select id="querySubmitTextTitleListBySubmitId" parameterType="java.lang.String" resultType="SubmitTextTitleModel">
+    <resultMap id="SubmitTextTitleModelMap" type="SubmitTextTitleModel" autoMapping="true">
+        <id column="id" property="id"/>
+        <result column="submit_id"  property="submitId"/>
+        <result column="title_id"  property="titleId"/>
+        <result column="text" property="text" />
+    </resultMap>
+
+    <select id="querySubmitTextTitleListBySubmitId" parameterType="java.lang.String" resultMap="SubmitTextTitleModelMap">
         select * from submits_text where submit_id=#{submitId}
     </select>
 </mapper>

@@ -37,6 +37,8 @@ public enum Message {
      */
     Exist("error.exists"),
 
+    NameColumnExist("error.name.column.exists"),
+
     NoExist("error.not.exists"),
 
     /**

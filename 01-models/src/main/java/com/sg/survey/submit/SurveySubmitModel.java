@@ -18,15 +18,17 @@ public class SurveySubmitModel {
     private String id;
     private String  surveyId;
     private String submitter;
+    private String wxNickname;
 
     public SurveySubmitModel(){
 
     }
 
-    public SurveySubmitModel(String id,String surveyId,String submitter){
+    public SurveySubmitModel(String id,String surveyId,String submitter,String wxNickname){
         this.id = id;
         this.surveyId = surveyId;
         this.submitter = submitter;
+        this.wxNickname = wxNickname;
     }
 
     public String getId() {
@@ -51,5 +53,13 @@ public class SurveySubmitModel {
 
     public void setSubmitter(String submitter) {
         this.submitter = submitter;
+    }
+
+    public String getWxNickname() {
+        return wxNickname;
+    }
+
+    public void setWxNickname(String wxNickname) {
+        this.wxNickname = wxNickname;
     }
 }

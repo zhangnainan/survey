@@ -13,10 +13,15 @@ public interface SubmitMultipleTitleDao {
 
     public int insertSubmitMultipleTitleList(List<SubmitOptionModel> submitOptionModelList);
 
-    public int deleteSubmitBySubmitId(String submitId);
+    //public int deleteSubmitBySubmitId(String submitId);
+    public int deleteSubmitMultipleTitleBySubmitId(String submitId);
 
     public int deleteSubmitMultipleByTitleId(List<TitleModel> titleModelList);
 
     public List<SubmitMultipleTitleModel> querySubmitMultipleTitleListBySubmitId(String submitId);
+
+    public List<SubmitMultipleTitleModel> querySubmitMultipleTitleModelGroupByTitleId(String submitId);
+
+
 
 }

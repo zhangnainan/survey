@@ -9,6 +9,7 @@ public class SurveyTitleOptionSubmitModel extends SurveyTitleOptionModel<TitleIn
 
     private String submitId;
 
+
     public String getSubmitId() {
         return submitId;
     }
@@ -16,4 +17,6 @@ public class SurveyTitleOptionSubmitModel extends SurveyTitleOptionModel<TitleIn
     public void setSubmitId(String submitId) {
         this.submitId = submitId;
     }
+
+
 }

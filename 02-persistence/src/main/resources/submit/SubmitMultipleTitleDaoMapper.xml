@@ -24,7 +24,31 @@
         </foreach>
     </delete>
 
-    <select id="querySubmitMultipleTitleListBySubmitId" parameterType="java.lang.String" resultType="SubmitMultipleTitleModel">
+    <resultMap id="SubmitMultipleTitleModelMap" type="SubmitMultipleTitleModel" autoMapping="true">
+        <id column="id" property="id"/>
+        <result column="submit_id"  property="submitId"/>
+        <result column="title_id"  property="titleId"/>
+        <collection property="optionIdList" ofType="java.lang.String" >
+            <constructor>
+                <arg column="option_id" />
+            </constructor>
+        </collection>
+    </resultMap>
+
+    <select id="querySubmitMultipleTitleListBySubmitId" parameterType="java.lang.String" resultMap="SubmitMultipleTitleModelMap">
+        select * from submits_multiple where submit_id=#{submitId}
+    </select>
+
+    <resultMap id="SubmitMultipleTitleModelGroupByTitleIdMap" type="SubmitMultipleTitleModel" autoMapping="true">
+        <id column="title_id"  property="titleId"/>
+        <result column="submit_id"  property="submitId"/>
+        <collection property="optionIdList" ofType="java.lang.String" >
+            <constructor>
+                <arg column="option_id" />
+            </constructor>
+        </collection>
+    </resultMap>
+    <select id="querySubmitMultipleTitleModelGroupByTitleId" resultMap="SubmitMultipleTitleModelGroupByTitleIdMap">
         select * from submits_multiple where submit_id=#{submitId}
     </select>
 </mapper>

@@ -1,9 +1,13 @@
 package com.sg.survey.title;
 
+
+import java.text.Collator;
+import java.util.Locale;
+
 /**
  * Created by jiuge on 2020/6/29.
  */
-public class TextNameModel {
+public class TextNameModel implements Comparable<TextNameModel>{
 
     private String text;
     private String name;
@@ -31,5 +35,11 @@ public class TextNameModel {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public int compareTo(TextNameModel textNameModel) {
+        Collator instance = Collator.getInstance(Locale.CHINA);
+        return instance.compare(this.name, textNameModel.getName());
     }
 }

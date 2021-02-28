@@ -12,7 +12,7 @@ public interface SurveyService {
      *
      * @return
      */
-    public Result getSurveyModelList();
+    public Result getSurveyModelListByCreator(String creator);
 
     /**
      * 获取问卷详细信息
@@ -22,6 +22,15 @@ public interface SurveyService {
      */
     public Result getSurveyTitleOptionModel(String surveyId);
 
+    /**
+     * 通过surveyId 和 userNickName 获取问卷信息。
+     *
+     * @param surveyId
+     * @param userNickName
+     * @return
+     */
+    public Result getSurveyTitleOptionModel(String surveyId, String userNickName);
+
 
     /**
      * 提交问卷调查填写结果
@@ -30,6 +39,15 @@ public interface SurveyService {
      * @return
      */
     public Result submitSurveyTitleOptionModel(SurveyTitleOptionModel surveyTitleOptionModel);
+
+    /**
+     * 提交问卷调查填写结果（如果该微信昵称上次有提交过，则进行更新操作）
+     *
+     * @param surveyTitleOptionModel
+     * @param wxNickname
+     * @return
+     */
+    public Result submitSurveyTitleOptionModel(SurveyTitleOptionModel surveyTitleOptionModel, String wxNickname);
 
     /**
      * 获取问卷结果汇总
@@ -82,6 +100,22 @@ public interface SurveyService {
      * @return
      */
     public Result deleteSurvey(String surveyId);
+
+    /**
+     * 更新survey的时间设置
+     *
+     * @param surveyModel
+     * @return
+     */
+    public Result updateSurveyTimeSetting(SurveyModel surveyModel);
+
+    /**
+     * 清空survey数据
+     *
+     * @param surveyId
+     * @return
+     */
+    public Result clearSurvey(String surveyId);
 
 //    /**
 //     * 获取问卷的详细信息

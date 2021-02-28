@@ -14,7 +14,8 @@ public class  SurveyTitleOptionModel <T>  {
     protected String surveyState;
     protected String creator;
     protected String notes;
-
+    protected String beginDateTime;
+    protected String endDateTime;
     protected List<T> titleList;
 
     public String getId() {
@@ -57,7 +58,21 @@ public class  SurveyTitleOptionModel <T>  {
         this.notes = notes;
     }
 
+    public String getBeginDateTime() {
+        return beginDateTime;
+    }
 
+    public void setBeginDateTime(String beginDateTime) {
+        this.beginDateTime = beginDateTime;
+    }
+
+    public String getEndDateTime() {
+        return endDateTime;
+    }
+
+    public void setEndDateTime(String endDateTime) {
+        this.endDateTime = endDateTime;
+    }
 
     public List<T> getTitleList() {
         return titleList;

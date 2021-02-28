@@ -14,6 +14,7 @@ public class TitleModel <T>  implements Comparable<TitleModel>{
     protected String title;
     protected String titleType;
     protected String required;
+    protected String isNameColumn;
     protected int titleSequence;
     protected List<T> optionModelList;
 
@@ -58,6 +59,14 @@ public class TitleModel <T>  implements Comparable<TitleModel>{
         this.required = required;
     }
 
+    public String getIsNameColumn() {
+        return isNameColumn;
+    }
+
+    public void setIsNameColumn(String isNameColumn) {
+        this.isNameColumn = isNameColumn;
+    }
+
     public int getTitleSequence() {
         return titleSequence;
     }
@@ -74,6 +83,21 @@ public class TitleModel <T>  implements Comparable<TitleModel>{
         this.optionModelList = optionModelList;
     }
 
+    public boolean textType(){
+        return this.titleType.equals(TitleType.Text.getVal());
+    }
+
+    public boolean singleType(){
+        return this.titleType.equals(TitleType.SingleTitle.getVal());
+    }
+
+    public boolean multipleType(){
+        return this.titleType.equals(TitleType.MultipleTitle.getVal());
+    }
+
+    public boolean nameSetting(){
+        return this.isNameColumn.equals(NameColumn.YES.getVal());
+    }
 
     @Override
     public int compareTo(TitleModel o) {

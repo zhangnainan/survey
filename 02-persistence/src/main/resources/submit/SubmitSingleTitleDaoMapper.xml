@@ -20,7 +20,15 @@
             delete from submits_single WHERE title_id=#{titleModel.id}
         </foreach>
     </delete>
-    <select id="querySubmitSingleTitleListBySubmitId" parameterType="java.lang.String" resultType="SubmitSingleTitleModel">
+
+    <resultMap id="SubmitSingleTitleModelMap" type="SubmitSingleTitleModel" autoMapping="true">
+        <id column="id" property="id"/>
+        <result column="submit_id"  property="submitId"/>
+        <result column="title_id"  property="titleId"/>
+        <result column="option_id" property="optionId" />
+    </resultMap>
+
+    <select id="querySubmitSingleTitleListBySubmitId" parameterType="java.lang.String" resultMap="SubmitSingleTitleModelMap">
         select * from submits_single where submit_id=#{submitId}
     </select>
 </mapper>

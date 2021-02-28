@@ -6,12 +6,10 @@ import com.sg.survey.Validator;
 import com.sg.survey.submit.SubmitTitleModel;
 import com.sg.survey.title.option.OptionDao;
 import com.sg.survey.title.option.OptionModel;
-import com.sg.survey.user.UserModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.DigestUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,17 +58,14 @@ public class TitleServiceImpl implements TitleService {
         }
 
         titleModel.setId(UUID.randomUUID().toString());
-        String titleType = titleModel.getTitleType();
-        if(titleType.equals(TitleType.SingleTitle.getVal()) || titleType.equals(TitleType.MultipleTitle.getVal()) ){
+        //String titleType = titleModel.getTitleType();
+        if(titleModel.singleType() || titleModel.multipleType()){
             if(Validator.isEmpty(titleModel.getOptionModelList())){
                 result.setMessage(Message.NotEmpty.getType());
                 return result;
             }
 
-            List<String> optionNameList = titleModel.getOptionModelList().stream().map(OptionModel::getOptionName)
-                    .collect(Collectors.toList());
-            long count = optionNameList.stream().distinct().count();
-            if(optionNameList.size() < count){
+            if(isOptionNameRepeat(titleModel)){
                 result.setMessage(Message.Repeat.getType());
                 return result;
             }
@@ -84,7 +79,13 @@ public class TitleServiceImpl implements TitleService {
         }
 
 
-
+        if(titleModel.textType() && titleModel.nameSetting()){
+            List<TitleModel> nameColumnTitleList = titleDao.queryNameColumnBySurveyId(titleModel.getSurveyId());
+            if(!Validator.isEmpty(nameColumnTitleList)){
+                result.setMessage(Message.NameColumnExist.getType());
+                return result;
+            }
+        }
 
     //    try{
         // 判断数据库中是否已经存在相同的题目
@@ -109,7 +110,7 @@ public class TitleServiceImpl implements TitleService {
             return result;
         }
         // 保存OptionModel
-        if(titleType.equals(TitleType.SingleTitle.getVal()) || titleType.equals(TitleType.MultipleTitle.getVal())){
+        if(titleModel.singleType() || titleModel.multipleType()){
             rows = optionDao.insertOptionList(titleModel.getOptionModelList());
             if(rows <= 0){
                 result.setMessage(Message.AddError.getType());
@@ -133,17 +134,13 @@ public class TitleServiceImpl implements TitleService {
             return result;
         }
 
-        String titleType = titleModel.getTitleType();
-        if(titleType.equals(TitleType.SingleTitle.getVal()) || titleType.equals(TitleType.MultipleTitle.getVal()) ){
+        if(titleModel.singleType() || titleModel.multipleType()){
             if(Validator.isEmpty(titleModel.getOptionModelList())){
                 result.setMessage(Message.NotEmpty.getType());
                 return result;
             }
 
-            List<String> optionNameList = titleModel.getOptionModelList().stream().map(OptionModel::getOptionName)
-                    .collect(Collectors.toList());
-            long count = optionNameList.stream().distinct().count();
-            if(optionNameList.size() < count){
+            if (isOptionNameRepeat(titleModel)){
                 result.setMessage(Message.Repeat.getType());
                 return result;
             }
@@ -154,19 +151,21 @@ public class TitleServiceImpl implements TitleService {
             }
         }
 
+        if(titleModel.textType() && titleModel.nameSetting()){
+            List<TitleModel> nameColumnTitleList = titleDao.queryNameColumnBySurveyId(titleModel.getSurveyId());
 
-
+            if(isTitleSettingDuplicate(nameColumnTitleList, titleModel)){
+                result.setMessage(Message.NameColumnExist.getType());
+                return result;
+            }
+        }
 
         //    try{
         // 判断数据库中是否已经存在相同的题目
         List<TitleModel> theSameTitleNameList = titleDao.queryTitleModel(titleModel.getSurveyId(),titleModel.getTitle());
-        if(!Validator.isEmpty(theSameTitleNameList)){
-            for(int i = 0; i < theSameTitleNameList.size(); i++) {
-                if (!theSameTitleNameList.get(i).getId().equals(titleModel.getId())) {
-                    result.setMessage(Message.Exist.getType());
-                    return result;
-                }
-            }
+        if(isTitleSettingDuplicate(theSameTitleNameList, titleModel)){
+            result.setMessage(Message.Exist.getType());
+            return result;
         }
 
         // 保存titleModel
@@ -176,7 +175,7 @@ public class TitleServiceImpl implements TitleService {
             return result;
         }
         // 保存OptionModel
-        if(titleType.equals(TitleType.SingleTitle.getVal()) || titleType.equals(TitleType.MultipleTitle.getVal())){
+        if(titleModel.singleType() || titleModel.multipleType()){
             List<OptionModel> updateList = new ArrayList<>();
             List<OptionModel> insertList = new ArrayList<>();
             for(OptionModel optionModel : titleModel.getOptionModelList()){
@@ -209,6 +208,8 @@ public class TitleServiceImpl implements TitleService {
         return result;
     }
 
+
+
     @Override
     @Transactional(propagation = Propagation.REQUIRED,rollbackFor = Exception.class)
     public Result deleteTitleModel(TitleModel<OptionModel> titleModel) {
@@ -231,8 +232,7 @@ public class TitleServiceImpl implements TitleService {
             return result;
         }
 
-        String titleType = titleModel.getTitleType();
-        if(titleType.equals(TitleType.SingleTitle.getVal()) || titleType.equals(TitleType.MultipleTitle.getVal())){
+        if(titleModel.singleType() || titleModel.multipleType()){
             if(!Validator.isEmpty(titleModel.getOptionModelList())){
                 rows = optionDao.deleteOptionModelList(titleModel.getOptionModelList());
                 if(rows < 0){
@@ -263,5 +263,28 @@ public class TitleServiceImpl implements TitleService {
     //    }
 
         return result;
+    }
+
+
+    private boolean isOptionNameRepeat(TitleModel<OptionModel> titleModel) {
+        List<String> optionNameList = titleModel.getOptionModelList().stream().map(OptionModel::getOptionName)
+                .collect(Collectors.toList());
+        long count = optionNameList.stream().distinct().count();
+        if (optionNameList.size() < count) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isTitleSettingDuplicate(List<TitleModel> titleModelList, TitleModel titleModel){
+        if(!Validator.isEmpty(titleModelList)){
+            for(int i = 0; i < titleModelList.size(); i++) {
+                if (!titleModelList.get(i).getId().equals(titleModel.getId())){
+                   return true;
+                }
+            }
+        }
+
+        return false;
     }
 }

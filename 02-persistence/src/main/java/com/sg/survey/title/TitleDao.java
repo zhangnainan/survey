@@ -16,6 +16,8 @@ public interface TitleDao {
 
     public List<TitleModel> queryTitleModel(@Param("surveyId") String surveyId, @Param("titleName") String titleName);
 
+    public List<TitleModel> queryNameColumnBySurveyId(String surveyId);
+
     public List<SubmitTitleModel> querySubmitTitleList(@Param("titleId") String titleId,@Param("titleType") String titleType);
 
     public int saveTitleModel(TitleModel titleModel);

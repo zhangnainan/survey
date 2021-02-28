@@ -3,7 +3,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sg.survey.submit.SurveySubmitDao">
     <insert id="insertSurveySubmit" parameterType="SurveySubmitModel">
-        insert into survey_submits(id,survey_id,submitter) values(#{id},#{surveyId},#{submitter})
+        insert into survey_submits(id,survey_id,submitter,wx_nickname) values(#{id},#{surveyId},#{submitter},#{wxNickname})
     </insert>
 
     <insert id="insertSurveySubmitList" parameterType="java.util.List">
@@ -13,11 +13,19 @@
         </foreach>
     </insert>
 
-    <select id="querySurveySubmitListBySurveyId" parameterType="java.lang.String" resultType="SurveySubmitModel">
+    <select id="getSurveySubmitsById" parameterType="java.lang.String" resultType="SurveySubmitModel">
         select * from survey_submits where survey_id=#{surveyId}
+    </select>
+
+    <select id="getSurveySubmitsByIdAndWxNickname" parameterType="java.lang.String" resultType="SurveySubmitModel">
+        select * from survey_submits where survey_id=#{surveyId} and wx_nickname=#{wxNickname}
     </select>
 
     <delete id="deleteSurveySubmitsBySurveyId" parameterType="java.lang.String">
         delete from survey_submits where survey_id=#{surveyId}
+    </delete>
+
+    <delete id="deleteSurveySubmitById" parameterType="java.lang.String">
+        delete from survey_submits where id=#{id}
     </delete>
 </mapper>

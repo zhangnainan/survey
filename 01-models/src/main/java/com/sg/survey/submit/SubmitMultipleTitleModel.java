@@ -29,6 +29,7 @@ public class SubmitMultipleTitleModel extends SubmitTitleModel {
         this.optionIdList = optionIdList;
     }
 
+
     public List<String> getOptionIdList() {
         return optionIdList;
     }

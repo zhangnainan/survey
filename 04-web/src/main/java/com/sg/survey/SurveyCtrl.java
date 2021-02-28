@@ -4,10 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.sg.survey.title.TitleInfoModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -25,9 +22,9 @@ public class SurveyCtrl{
 
     @ResponseBody
     @RequestMapping(value = "/get/survey/list",method = RequestMethod.GET,produces = "text/plain;charset=utf-8")
-    public String getSurveyModelList(){
+    public String getSurveyModelList(String creator){
 
-        Result result = surveyService.getSurveyModelList();
+        Result result = surveyService.getSurveyModelListByCreator(creator);
         String resultStr = JSON.toJSONString(result);
 
         return resultStr;
@@ -44,10 +41,20 @@ public class SurveyCtrl{
     }
 
     @ResponseBody
-    @RequestMapping(value = "/submit/survey",method = RequestMethod.POST,produces = "text/plain;charset=utf-8")
-    public String submitSurveyTitleOptionModel(@RequestBody  SurveyTitleOptionModel<TitleInfoModel> surveyTitleOptionModel){
+    @RequestMapping(value = "/load/survey",method = RequestMethod.GET,produces = "text/plain;charset=utf-8")
+    public String loadSurvey(String surveyId, String wxNickname){
 
-        Result result = surveyService.submitSurveyTitleOptionModel(surveyTitleOptionModel);
+        Result result = surveyService.getSurveyTitleOptionModel(surveyId,wxNickname);
+        String resultStr = JSON.toJSONString(result);
+
+        return resultStr;
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/submit/survey",method = RequestMethod.POST,produces = "text/plain;charset=utf-8")
+    public String submitSurveyTitleOptionModel(@RequestBody  SurveyTitleOptionModel<TitleInfoModel> survey, String wxNickname){
+
+        Result result = surveyService.submitSurveyTitleOptionModel(survey,wxNickname);
         String resultStr = JSON.toJSONString(result);
 
         return resultStr;
@@ -110,6 +117,29 @@ public class SurveyCtrl{
 
         String surveyId = paramsMap.get("surveyId").toString();
         Result result = surveyService.deleteSurvey(surveyId);
+        String resultStr = JSON.toJSONString(result);
+
+        return resultStr;
+    }
+
+
+    @ResponseBody
+    @RequestMapping(value = "/clear/survey",method = RequestMethod.DELETE,produces = "text/plain;charset=utf-8")
+    public String clearSurvey(@RequestBody Map<String,Object> paramsMap){
+
+        String surveyId = paramsMap.get("surveyId").toString();
+        Result result = surveyService.clearSurvey(surveyId);
+        String resultStr = JSON.toJSONString(result);
+
+        return resultStr;
+    }
+
+
+    @ResponseBody
+    @RequestMapping(value = "/update/survey/time/setting",method = RequestMethod.POST,produces = "text/plain;charset=utf-8")
+    public String updateSurveyTimeSetting(@RequestBody  SurveyModel surveyModel){
+
+        Result result = surveyService.updateSurveyTimeSetting(surveyModel);
         String resultStr = JSON.toJSONString(result);
 
         return resultStr;

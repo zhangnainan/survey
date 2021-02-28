@@ -48,7 +48,7 @@ public class OptionModel {
         this.titleId = titleId;
     }
 
-    public String getOptionName() {
+    public  String getOptionName() {
         return optionName;
     }
 
@@ -71,4 +71,6 @@ public class OptionModel {
     public void setSelected(boolean selected) {
         this.selected = selected;
     }
+
+
 }

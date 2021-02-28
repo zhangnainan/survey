@@ -17,6 +17,8 @@ public class SurveyModel {
     private String surveyState;
     private String creator;
     private String notes;
+    private String beginDateTime;
+    private String endDateTime;
     private int submitCount;
 
     public SurveyModel(){
@@ -69,6 +71,22 @@ public class SurveyModel {
 
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    public String getBeginDateTime() {
+        return beginDateTime;
+    }
+
+    public void setBeginDateTime(String beginDateTime) {
+        this.beginDateTime = beginDateTime;
+    }
+
+    public String getEndDateTime() {
+        return endDateTime;
+    }
+
+    public void setEndDateTime(String endDateTime) {
+        this.endDateTime = endDateTime;
     }
 
     public int getSubmitCount() {

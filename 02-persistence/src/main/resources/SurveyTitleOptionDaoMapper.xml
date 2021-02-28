@@ -8,12 +8,15 @@
         <result column="survey_state" property="surveyState"/>
         <result column="creator" property="creator"/>
         <result column="notes" property="notes"/>
+        <result column="begin_date_time" property="beginDateTime"/>
+        <result column="end_date_time" property="endDateTime"/>
         <collection property="titleList" javaType="java.util.List" ofType="TitleInfoModel" >
             <id column="titleId" property="id"/>
             <result column="survey_id" property="surveyId"/>
             <result column="title" property="title"/>
             <result column="title_type" property="titleType"/>
             <result column="required" property="required"/>
+            <result column="is_name_column" property="isNameColumn" />
             <result column="title_sequence" property="titleSequence"/>
             <!-- <result column="text" property="text"/> -->
             <collection property="optionModelList" javaType="java.util.List" ofType="OptionModel" >
@@ -26,8 +29,8 @@
     </resultMap>
 
     <select id="getSurveyTitleOptionModelById" parameterType="java.lang.String" resultMap="SurveyTitleOptionResult">
-        select s.id,s.survey_name,s.survey_state,s.creator,s.notes,
-        st.id as titleId,st.survey_id,st.title,st.title_type,st.required,st.title_sequence,null as text,
+        select s.id,s.survey_name,s.survey_state,s.creator,s.notes,s.begin_date_time,s.end_date_time,
+        st.id as titleId,st.survey_id,st.title,st.title_type,st.required,st.is_name_column,st.title_sequence,null as text,
         tos.id as optionId,tos.title_id,tos.option_name,tos.option_sequence
         from survey s
         left join survey_titles st on s.id=st.survey_id
@@ -42,12 +45,15 @@
         <result column="survey_state" property="surveyState"/>
         <result column="creator" property="creator"/>
         <result column="notes" property="notes"/>
+        <result column="begin_date_time" property="beginDateTime"/>
+        <result column="end_date_time" property="endDateTime"/>
         <collection property="titleList" javaType="java.util.List" ofType="TitleStatisticsModel" >
             <id column="titleId" property="id"/>
             <result column="survey_id" property="surveyId"/>
             <result column="title" property="title"/>
             <result column="title_type" property="titleType"/>
             <result column="required" property="required"/>
+            <result column="is_name_column" property="isNameColumn" />
             <result column="title_sequence" property="titleSequence"/>
             <collection property="optionModelList" javaType="java.util.List" ofType="OptionStatisticsModel" >
                 <id column="optionId" property="id"/>
@@ -59,8 +65,8 @@
     </resultMap>
 
     <select id="getSurveyStatistics" parameterType="java.lang.String" resultMap="SurveyStatisticsResult">
-        select s.id,s.survey_name,s.survey_state,s.creator,s.notes,
-        st.id as titleId,st.survey_id,st.title,st.title_type,st.required,st.title_sequence,
+        select s.id,s.survey_name,s.survey_state,s.creator,s.notes,s.begin_date_time,s.end_date_time,
+        st.id as titleId,st.survey_id,st.title,st.title_type,st.required,st.is_name_column,st.title_sequence,
         tos.id as optionId,tos.title_id,tos.option_name,tos.option_sequence
         from survey s
         left join survey_titles st on s.id=st.survey_id
@@ -75,6 +81,8 @@
         <result column="survey_state" property="surveyState"/>
         <result column="creator" property="creator"/>
         <result column="notes" property="notes"/>
+        <result column="begin_date_time" property="beginDateTime"/>
+        <result column="end_date_time" property="endDateTime"/>
         <!--<association property="submitsCount" column="id" select="getSubmitsCount" /> -->
         <!--<association property="submitSummaryModelList" column="id" javaType="SubmitSummaryModel" select="getSubmitSummaryList" />-->
         <collection property="submitSummaryModelList" column="id" select="getSubmitSummaryList" >
@@ -94,6 +102,7 @@
             <result column="title" property="title"/>
             <result column="title_type" property="titleType"/>
             <result column="required" property="required"/>
+            <result column="is_name_column" property="isNameColumn" />
             <result column="title_sequence" property="titleSequence"/>
             <collection  property="submitTitleAnswerModelList"  ofType="SubmitTitleAnswerModel">
                 <id column="answerId" property="id" />
@@ -114,8 +123,8 @@
 
     
     <select id="getSurveySubmitSummary" parameterType="java.lang.String"  resultMap="SurveyTitleOptionSummaryResult">
-        select s.id,s.survey_name,s.survey_state,s.creator,s.notes,
-                st.id as titleId,st.survey_id,st.title,st.title_type,st.required,st.title_sequence,
+        select s.id,s.survey_name,s.survey_state,s.creator,s.notes,s.begin_date_time,s.end_date_time,
+                st.id as titleId,st.survey_id,st.title,st.title_type,st.required,st.is_name_column,st.title_sequence,
                 tos.id as optionId,tos.title_id,tos.option_name,tos.option_sequence,ss.id as answerId,ss.title_id as answerTitleId,ss.submit_id as answerSubmitId,ss.option_id as answer
                 from survey s
                 left join survey_titles st on s.id=st.survey_id
@@ -124,8 +133,8 @@
                 where s.id = #{surveyId}
                 and st.title_type='0'
                 union all
-        select s.id,s.survey_name,s.survey_state,s.creator,s.notes,
-                st.id as titleId,st.survey_id,st.title,st.title_type,st.required,st.title_sequence,
+        select s.id,s.survey_name,s.survey_state,s.creator,s.notes,s.begin_date_time,s.end_date_time,
+                st.id as titleId,st.survey_id,st.title,st.title_type,st.required,st.is_name_column,st.title_sequence,
                 tos.id as optionId,tos.title_id,tos.option_name,tos.option_sequence,sm.id as answerId,sm.title_id as answerTitleId,sm.submit_id as answerSubmitId,sm.option_id as answer
                 from survey s
                 left join survey_titles st on s.id=st.survey_id
@@ -134,8 +143,8 @@
                 where s.id = #{surveyId}
                 and st.title_type='1'
                 union all
-        select s.id,s.survey_name,s.survey_state,s.creator,s.notes,
-                st.id as titleId,st.survey_id,st.title,st.title_type,st.required,st.title_sequence,
+        select s.id,s.survey_name,s.survey_state,s.creator,s.notes,s.begin_date_time,s.end_date_time,
+                st.id as titleId,st.survey_id,st.title,st.title_type,st.required,st.is_name_column,st.title_sequence,
                 tos.id as optionId,tos.title_id,tos.option_name,tos.option_sequence,subt.id as answerId,subt.title_id as answerTitleId,subt.submit_id as answerSubmitId,subt.text as answer
                 from survey s
                 left join survey_titles st on s.id=st.survey_id
@@ -185,6 +194,7 @@
             <result column="title" property="title"/>
             <result column="title_type" property="titleType"/>
             <result column="required" property="required"/>
+            <result column="is_name_column" property="isNameColumn" />
             <result column="title_sequence" property="titleSequence"/>
             <result column="text" property="text"/>
             <collection property="optionModelList" javaType="java.util.List" ofType="OptionModel" >
@@ -197,21 +207,21 @@
     </resultMap>
 
     <select id="getSurveySubmitDetailList" parameterType="java.lang.String" resultMap="SurveyTitleOptionSubmitResult">
-        select ss.id as submitId,ss.submitter,st.id,st.submit_id,st.text,s.id,s.survey_name,s.survey_state,s.creator,s.notes,stles.id as titleId,stles.title,stles.title_type,stles.title_sequence,stles.required,tos.id as optionId,tos.title_id,tos.option_name,tos.option_sequence from  survey_submits ss
+        select ss.id as submitId,ss.submitter,st.id,st.submit_id,st.text,s.id,s.survey_name,s.survey_state,s.creator,s.notes,stles.id as titleId,stles.title,stles.title_type,stles.title_sequence,stles.required,stles.is_name_column,tos.id as optionId,tos.title_id,tos.option_name,tos.option_sequence from  survey_submits ss
         left join submits_text st on st.submit_id = ss.id
         left join survey s  on s.id = ss.survey_id
         left join survey_titles stles on stles.id = st.title_id
         left join title_options tos on st.id = tos.title_id
         where ss.survey_id = #{surveyId}
         union all
-        select ss.id as submitId,ss.submitter,ssg.id,ssg.submit_id,null as text,s.id,s.survey_name,s.survey_state,s.creator,s.notes,stles.id as titleId,stles.title,stles.title_type,stles.title_sequence,stles.required,tos.id as optionId,tos.title_id,tos.option_name,tos.option_sequence  from  survey_submits ss
+        select ss.id as submitId,ss.submitter,ssg.id,ssg.submit_id,null as text,s.id,s.survey_name,s.survey_state,s.creator,s.notes,stles.id as titleId,stles.title,stles.title_type,stles.title_sequence,stles.required,stles.is_name_column,tos.id as optionId,tos.title_id,tos.option_name,tos.option_sequence  from  survey_submits ss
         left join submits_single ssg on ssg.submit_id = ss.id
         left join survey s  on s.id = ss.survey_id
         left join survey_titles stles on stles.id = ssg.title_id
         left join title_options tos on tos.id = ssg.option_id
         where ss.survey_id = #{surveyId}
         union all
-        select ss.id as submitId,ss.submitter,sm.id,sm.submit_id,null as text ,s.id,s.survey_name,s.survey_state,s.creator,s.notes,stles.id  as titleId,stles.title,stles.title_type,stles.title_sequence,stles.required,tos.id as optionId,tos.title_id,tos.option_name,tos.option_sequence  from  survey_submits ss
+        select ss.id as submitId,ss.submitter,sm.id,sm.submit_id,null as text ,s.id,s.survey_name,s.survey_state,s.creator,s.notes,stles.id  as titleId,stles.title,stles.title_type,stles.title_sequence,stles.required,stles.is_name_column,tos.id as optionId,tos.title_id,tos.option_name,tos.option_sequence  from  survey_submits ss
         left join submits_multiple sm on sm.submit_id = ss.id
         left join survey s  on s.id = ss.survey_id
         left join survey_titles stles on stles.id = sm.title_id
