@@ -21,7 +21,4 @@ public interface SubmitMultipleTitleDao {
     public List<SubmitMultipleTitleModel> querySubmitMultipleTitleListBySubmitId(String submitId);
 
     public List<SubmitMultipleTitleModel> querySubmitMultipleTitleModelGroupByTitleId(String submitId);
-
-
-
 }

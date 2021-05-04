@@ -1,7 +1,5 @@
 package com.sg.survey;
 
-import com.sg.survey.title.TitleModel;
-
 import java.util.List;
 
 /**
@@ -12,7 +10,9 @@ public class  SurveyTitleOptionModel <T>  {
     protected String id;
     protected String surveyName;
     protected String surveyState;
+    protected String surveyType;
     protected String creator;
+    protected int answerTitleNum;
     protected String notes;
     protected String beginDateTime;
     protected String endDateTime;
@@ -42,12 +42,28 @@ public class  SurveyTitleOptionModel <T>  {
         this.surveyState = surveyState;
     }
 
+    public String getSurveyType() {
+        return surveyType;
+    }
+
+    public void setSurveyType(String surveyType) {
+        this.surveyType = surveyType;
+    }
+
     public String getCreator() {
         return creator;
     }
 
     public void setCreator(String creator) {
         this.creator = creator;
+    }
+
+    public int getAnswerTitleNum() {
+        return answerTitleNum;
+    }
+
+    public void setAnswerTitleNum(int answerTitleNum) {
+        this.answerTitleNum = answerTitleNum;
     }
 
     public String getNotes() {

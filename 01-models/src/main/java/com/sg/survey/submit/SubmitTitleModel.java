@@ -1,9 +1,5 @@
 package com.sg.survey.submit;
 
-import org.springframework.stereotype.Component;
-
-import javax.persistence.Entity;
-
 /**
  * Created by jiuge on 2020/5/7.
  */

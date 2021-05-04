@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sg.survey.submit.SubmitMultipleTitleDao">
+    <insert id="insertSubmitMultipleTitle" parameterType="SubmitOptionModel">
+        insert into submits_multiple(id,submit_id,title_id,option_id) values(#{id},#{submitId},#{titleId},#{optionId})
+    </insert>
+
+    <insert id="insertSubmitMultipleTitleList" parameterType="java.util.List">
+        insert into submits_multiple(id,submit_id,title_id,option_id) values
+        <foreach collection="list" index="index" item="item" separator="," open="" close="" >
+
+            (#{item.id},#{item.submitId},#{item.titleId},#{item.optionId})
+
+        </foreach>
+    </insert>
+    <delete id="deleteSubmitMultipleTitleBySubmitId" parameterType="java.lang.String">
+        delete from submits_multiple where submit_id=#{submitId}
+    </delete>
+
+    <delete id="deleteSubmitMultipleByTitleId" parameterType="java.util.List">
+        <foreach collection="list" separator=";" item="titleModel" open="" close="" index="index">
+            delete from submits_multiple where title_id=#{titleModel.id}
+        </foreach>
+    </delete>
+
+    <resultMap id="SubmitMultipleTitleModelMap" type="SubmitMultipleTitleModel" autoMapping="true">
+        <id column="id" property="id"/>
+        <result column="submit_id"  property="submitId"/>
+        <result column="title_id"  property="titleId"/>
+        <collection property="optionIdList" ofType="java.lang.String" >
+            <constructor>
+                <arg column="option_id" />
+            </constructor>
+        </collection>
+    </resultMap>
+
+    <select id="querySubmitMultipleTitleListBySubmitId" parameterType="java.lang.String" resultMap="SubmitMultipleTitleModelMap">
+        select * from submits_multiple where submit_id=#{submitId}
+    </select>
+
+    <resultMap id="SubmitMultipleTitleModelGroupByTitleIdMap" type="SubmitMultipleTitleModel" autoMapping="true">
+        <id column="title_id"  property="titleId"/>
+        <result column="submit_id"  property="submitId"/>
+        <collection property="optionIdList" ofType="java.lang.String" >
+            <constructor>
+                <arg column="option_id" />
+            </constructor>
+        </collection>
+    </resultMap>
+    <select id="querySubmitMultipleTitleModelGroupByTitleId" resultMap="SubmitMultipleTitleModelGroupByTitleIdMap">
+        select * from submits_multiple where submit_id=#{submitId}
+    </select>
+</mapper>

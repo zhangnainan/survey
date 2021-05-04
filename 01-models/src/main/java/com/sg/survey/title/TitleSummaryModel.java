@@ -9,6 +9,7 @@ import java.util.List;
  * Created by jiuge on 2020/6/11.
  */
 public class TitleSummaryModel extends TitleModel<OptionSummaryModel> {
+
     private List<SubmitTitleAnswerModel> submitTitleAnswerModelList;
 
     public List<SubmitTitleAnswerModel> getSubmitTitleAnswerModelList() {

@@ -8,10 +8,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.util.DigestUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Created by jiuge on 2020/5/7.
@@ -39,13 +36,46 @@ import java.util.UUID;
         //getSurveyStatistics();
         //根据调查名称查询问卷
         //querySurveyByName();
-        querySubmitTitleList();
+        //querySubmitTitleList();
+        // 获取submitModel
+        //getSurveySubmitList();
+        //getTitlePage();
+        getTitleAnswerPage();
+    }
+
+
+
+    private static void getTitleCount(){
+        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("spring-dao.xml");
+        TitleDao titleDao = (TitleDao) applicationContext.getBean("titleDaoMapper");
+        int titleCount = titleDao.getTitleCount("e4c2a34f-acbb-44f2-a9f5-f3dee5e079e0");
+    }
+
+    private static void getTitleAnswerPage(){
+        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("spring-dao.xml");
+        TitleDao titleDao = (TitleDao) applicationContext.getBean("titleDaoMapper");
+        List<TitleAnswerModel> titleModelList = titleDao.getTitleAnswerPage("e4c2a34f-acbb-44f2-a9f5-f3dee5e079e0",10,0);
+    }
+
+    private static void getTitlePage(){
+        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("spring-dao.xml");
+        TitleDao titleDao = (TitleDao) applicationContext.getBean("titleDaoMapper");
+        List<TitleModel<OptionModel>> titleModelList = titleDao.getTitlePage("e4c2a34f-acbb-44f2-a9f5-f3dee5e079e0",10,0);
     }
 
     private static void md5Test(){
-        String md5Str = DigestUtils.md5DigestAsHex("sgzj@1958".getBytes());
+        String md5Str = DigestUtils.md5DigestAsHex("test123456".getBytes());
         System.out.println(md5Str);
-        //System.out.println(UUID.randomUUID().toString());
+        System.out.println(UUID.randomUUID().toString());
+    }
+
+    private static void getSurveySubmitList(){
+        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("spring-dao.xml");
+        SurveySubmitDao surveySubmitDao = (SurveySubmitDao) applicationContext.getBean("surveySubmitDaoMapper");
+        List<SurveySubmitModel> surveySubmitModels = surveySubmitDao.getSurveySubmitsById("369868a3-e592-4da7-8c4d-ac3853f407a8");
+       // TitleDao titleDao = (TitleDao)applicationContext.getBean("titleDaoMapper");
+       // List<TitleModel> titleModelList = titleDao.getAllTitleModelList("369868a3-e592-4da7-8c4d-ac3853f407a8");
+
     }
 
     private static void getTitleModelList(){
@@ -57,8 +87,7 @@ import java.util.UUID;
     private static void querySurveyTitleOptionModelTest(){
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("spring-dao.xml");
         SurveyTitleOptionDao surveyTitleOptionDao = (SurveyTitleOptionDao) applicationContext.getBean("surveyTitleOptionDaoMapper");
-
-        SurveyTitleOptionModel surveyTitleOptionModel = surveyTitleOptionDao.getSurveyTitleOptionModelById("7503badc-f574-48e5-a167-732450f00b5f");
+        SurveyTitleOptionModel surveyTitleOptionModel = surveyTitleOptionDao.getSurveyTitleOptionModelById("db4be039-f0f5-4d08-900d-836a6a30c1b2");
     }
 
     private static void getSurveyStatistics(){
@@ -92,6 +121,7 @@ import java.util.UUID;
         TitleDao titleDao = (TitleDao) applicationContext.getBean("titleDaoMapper");
         List<SubmitTitleModel> submitTitleModelList = titleDao.querySubmitTitleList("54a8d096-ea33-424b-a84a-efde735cb6a0","0");
     }
+
     private static void createSurvey(){
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("spring-dao.xml");
         SurveyDao surveyDao = (SurveyDao) applicationContext.getBean("surveyDaoMapper");
@@ -119,7 +149,6 @@ import java.util.UUID;
         optionModelList.add(optionModel3);
         optionModelList.add(optionModel4);
 
-
         SurveyTitleModel surveyTitleModel2 = new SurveyTitleModel(UUID.randomUUID().toString(),surveyModel.getId(),"岗位", TitleType.SingleTitle.getVal(), RequiredFlag.True.getFlag(),2);
         OptionModel optionModel21 = new OptionModel(UUID.randomUUID().toString(),surveyTitleModel2.getId(),"废钢判定",1);
         OptionModel optionModel22 = new OptionModel(UUID.randomUUID().toString(),surveyTitleModel2.getId(),"二化",2);
@@ -130,9 +159,6 @@ import java.util.UUID;
         optionModelList.add(optionModel22);
         optionModelList.add(optionModel23);
         optionModelList.add(optionModel24);
-
-
-
 
         SurveyTitleModel surveyTitleModel3 = new SurveyTitleModel(UUID.randomUUID().toString(),surveyModel.getId(),"姓名", TitleType.Text.getVal(), RequiredFlag.True.getFlag(),3);
         surveyTitleModelList.add(surveyTitleModel3);
@@ -154,6 +180,35 @@ import java.util.UUID;
         optionDao.insertOptionList(optionModelList);
     }
 
+
+    private void simulate(){
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    private static void getSurveySubmit(){
+
+    }
 
     private static void submitSurvey(){
 //        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("spring-dao.xml");

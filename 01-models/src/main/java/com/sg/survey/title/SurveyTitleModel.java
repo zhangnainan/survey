@@ -3,7 +3,6 @@ package com.sg.survey.title;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.Entity;
-import java.util.List;
 
 /**
  * Created by jiuge on 2020/5/7.

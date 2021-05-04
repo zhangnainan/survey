@@ -1,6 +1,5 @@
 package com.sg.survey;
 
-import com.sg.survey.SurveyTitleOptionModel;
 import com.sg.survey.title.TitleStatisticsModel;
 
 /**

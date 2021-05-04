@@ -17,6 +17,8 @@ public interface SurveySubmitDao {
 
     public List<SurveySubmitModel> getSurveySubmitsByIdAndWxNickname(@Param("surveyId") String surveyId,@Param("wxNickname") String wxNickname);
 
+    public List<SurveySubmitModel> getSurveySubmitsByIdAndWxOpenId(@Param("surveyId") String surveyId,@Param("wxOpenId") String wxOpenId);
+
     public int deleteSurveySubmitsBySurveyId(String surveyId);
 
     public int deleteSurveySubmitById(String id);

@@ -3,7 +3,6 @@ package com.sg.survey.submit;
 import com.sg.survey.title.TitleModel;
 
 import java.util.List;
-import java.util.Timer;
 
 /**
  * Created by jiuge on 2020/5/18.

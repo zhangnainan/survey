@@ -30,7 +30,14 @@ public enum Message {
      */
     InputIllegal("error.input.illegal"),
 
+
+
     Repeat("error.repeat"),
+
+
+    RepeatTitle("error.title.repeat"),
+
+    RepeatOption("error.option.repeat"),
 
     /**
      * 信息已经存在
@@ -65,6 +72,8 @@ public enum Message {
      * 无法查询到相关记录
      */
     SelectNoAnyRecord("error.select.not.record"),
+
+    FileStreamCloseFail("error.file.stream.close"),
 
     /**
      * 重复操作

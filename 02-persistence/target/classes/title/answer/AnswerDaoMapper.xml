@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sg.survey.title.answer.AnswerDao">
+
+
+    <insert id="saveAnswerModelList" parameterType="java.util.List" useGeneratedKeys="false">
+        insert into title_answers(id,title_id,answer,answer_sequence) values
+        <foreach collection="list" item="item" separator=","  index="index" open="" close="">
+            (#{item.id},#{item.titleId},#{item.answer},${item.answerSequence})
+        </foreach>
+    </insert>
+
+    <delete id="deleteAnswerModelList" parameterType="java.util.List">
+        delete from title_answers where id in
+        <foreach collection="list" open="(" close=")" separator="," item="item" index="index">
+            #{item.id}
+        </foreach>
+    </delete>
+
+    <delete id="deleteAnswerModelByAnswer" parameterType="java.lang.String">
+        delete from title_answers where answer=#{answer}
+    </delete>
+
+    <delete id="deleteAnswerModelByTitleId" parameterType="java.lang.String">
+        delete from title_answers where title_id=#{titleId}
+    </delete>
+
+
+    <update id="updateAnswerModelList" parameterType="java.util.List">
+        <foreach collection="list" item="item" open="" close="" separator=";" index="index">
+            update title_answers set title_id=#{item.titleId},answer=#{item.answer},answer_sequence=${item.answerSequence} where id=#{item.id}
+        </foreach>
+    </update>
+
+
+</mapper>

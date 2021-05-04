@@ -3,7 +3,6 @@ package com.sg.survey;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.Entity;
-import java.util.List;
 
 /**
  * Created by jiuge on 2020/5/7.
@@ -15,7 +14,9 @@ public class SurveyModel {
     private String id;
     private String surveyName;
     private String surveyState;
+    private String surveyType;
     private String creator;
+    private int answerTitleNum;
     private String notes;
     private String beginDateTime;
     private String endDateTime;
@@ -57,12 +58,28 @@ public class SurveyModel {
         this.surveyState = surveyState;
     }
 
+    public String getSurveyType() {
+        return surveyType;
+    }
+
+    public void setSurveyType(String surveyType) {
+        this.surveyType = surveyType;
+    }
+
     public String getCreator() {
         return creator;
     }
 
     public void setCreator(String creator) {
         this.creator = creator;
+    }
+
+    public int getAnswerTitleNum() {
+        return answerTitleNum;
+    }
+
+    public void setAnswerTitleNum(int answerTitleNum) {
+        this.answerTitleNum = answerTitleNum;
     }
 
     public String getNotes() {

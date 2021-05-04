@@ -1,20 +1,24 @@
 package com.sg.survey;
 
-import com.alibaba.fastjson.parser.deserializer.ThrowableDeserializer;
+import com.alibaba.fastjson.JSON;
 import com.sg.survey.submit.*;
 import com.sg.survey.title.*;
+import com.sg.survey.title.answer.AnswerModel;
 import com.sg.survey.title.option.OptionDao;
 import com.sg.survey.title.option.OptionModel;
 import com.sg.survey.title.option.OptionStatisticsModel;
 import com.sg.survey.title.option.OptionSummaryModel;
+import com.sg.survey.util.UploadUtil;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.interceptor.TransactionAspectSupport;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.Collator;
 import java.text.DecimalFormat;
 import java.util.*;
@@ -52,6 +56,12 @@ public class SurveyServiceImpl implements SurveyService {
     @Autowired
     private SubmitTextTitleDao submitTextTitleDao;
 
+    @Autowired
+    private SubmitFileTitleDao submitFileTitleDao;
+
+    @Autowired
+    private TitleService titleService;
+
     @Override
     public Result getSurveyModelListByCreator(String creator){
         Result result = new Result();
@@ -68,6 +78,43 @@ public class SurveyServiceImpl implements SurveyService {
         }else{
             result.setMessage(Message.SelectNoAnyRecord.getType());
         }
+
+        return result;
+    }
+
+    @Override
+    public Result getSurveyModelListByCreatorAndType(String creator, String surveyType) {
+        Result result = new Result();
+
+        if(Validator.isEmpty(creator)){
+            result.setMessage(Message.NotEmpty.getType());
+            return result;
+        }
+
+        List<SurveyModel> surveyModelList = surveyDao.querySurveyListByCreatorAndType(creator, surveyType);
+        if(!Validator.isEmpty(surveyModelList)){
+            result.setData(surveyModelList);
+            result.setMessage(Message.Success.getType());
+        }else{
+            result.setMessage(Message.SelectNoAnyRecord.getType());
+        }
+
+        return result;
+    }
+
+    @Override
+    public Result getSurveyInfo(String surveyId) {
+        Result result = new Result();
+
+
+        if(Validator.isEmpty(surveyId)){
+            result.setMessage(Message.NotEmpty.getType());
+            return result;
+        }
+        SurveyModel surveyModel = surveyDao.queryById(surveyId);
+        result.setData(surveyModel);
+        result.setMessage(Message.Success.getType());
+
         return result;
     }
 
@@ -98,25 +145,31 @@ public class SurveyServiceImpl implements SurveyService {
     }
 
     @Override
-    public Result getSurveyTitleOptionModel(String surveyId, String wxNickname) {
+    public Result getSurveyTitleOptionModel(String surveyId, String wxNickname, String wxOpenId) {
         Result result = new Result();
+
         if(Validator.isEmpty(surveyId)){
             result.setData(null);
             result.setMessage(Message.NotEmpty.getType());
             return result;
         }
-
         SurveyTitleOptionModel<TitleInfoModel> surveyTitleOptionModel = null;
         try{
             surveyTitleOptionModel = surveyTitleOptionDao.getSurveyTitleOptionModelById(surveyId);
             this.initTextValue(surveyTitleOptionModel);
-            List<SurveySubmitModel> surveySubmitModelList = surveySubmitDao.getSurveySubmitsByIdAndWxNickname(surveyId, wxNickname);
+            List<SurveySubmitModel> surveySubmitModelList = null;
+            surveySubmitModelList = surveySubmitDao.getSurveySubmitsByIdAndWxOpenId(surveyId, wxOpenId);
+            if(Validator.isEmpty(surveySubmitModelList)){
+                surveySubmitModelList = surveySubmitDao.getSurveySubmitsByIdAndWxNickname(surveyId, wxNickname);
+            }
             if(!Validator.isEmpty(surveySubmitModelList)){
                 String submitId = surveySubmitModelList.get(0).getId();
                 List<SubmitSingleTitleModel> submitSingleTitleModelList = submitSingleTitleDao.querySubmitSingleTitleListBySubmitId(submitId);
                 List<SubmitMultipleTitleModel> submitMultipleTitleModelList = submitMultipleTitleDao.querySubmitMultipleTitleModelGroupByTitleId(submitId);
                 List<SubmitTextTitleModel> submitTextTitleModelList = submitTextTitleDao.querySubmitTextTitleListBySubmitId(submitId);
-                Map<String,SubmitTitleModel> submitTitleModelMap = convertSubmitTitleListToMap(submitSingleTitleModelList,submitMultipleTitleModelList,submitTextTitleModelList);
+                List<SubmitFileTitleModel> submitFileTitleModelList = submitFileTitleDao.querySubmitFileTitleListBySubmitId(submitId);
+                Map<String,SubmitTitleModel> submitTitleModelMap = convertSubmitTitleListToMap(submitSingleTitleModelList,submitMultipleTitleModelList,submitTextTitleModelList,submitFileTitleModelList);
+
                 fillTitleAnswer(submitTitleModelMap, surveyTitleOptionModel);
             }
             result.setData(surveyTitleOptionModel);
@@ -141,14 +194,14 @@ public class SurveyServiceImpl implements SurveyService {
             result.setMessage(Message.NotEmpty.getType());
             return result;
         }
-        return submitSurveyAnswer(surveyTitleOptionModel,null, result);
+        return submitSurveyAnswer(surveyTitleOptionModel,null,null, result);
     }
 
 
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED,rollbackFor = Exception.class)
-    public Result submitSurveyTitleOptionModel(SurveyTitleOptionModel surveyTitleOptionModel, String wxNickname) {
+    public Result submitSurveyTitleOptionModel(SurveyTitleOptionModel surveyTitleOptionModel, String wxNickname, String wxOpenId) {
         Result result = new Result();
 
         if(Validator.isEmpty(surveyTitleOptionModel) || Validator.isEmpty(surveyTitleOptionModel.getTitleList())){
@@ -159,7 +212,10 @@ public class SurveyServiceImpl implements SurveyService {
         // 先判断之前是否有提交，如果有提交过先删除
         List<SurveySubmitModel> submitTitleModelList = null;
         String surveyId = surveyTitleOptionModel.getId();
-        submitTitleModelList = surveySubmitDao.getSurveySubmitsByIdAndWxNickname(surveyId, wxNickname);
+        submitTitleModelList = surveySubmitDao.getSurveySubmitsByIdAndWxOpenId(surveyId, wxOpenId);
+        if(Validator.isEmpty(submitTitleModelList)){
+            submitTitleModelList = surveySubmitDao.getSurveySubmitsByIdAndWxNickname(surveyId, wxNickname);
+        }
         SurveySubmitModel currentSurveySubmitModel = null;
         if(!Validator.isEmpty(submitTitleModelList)){
             currentSurveySubmitModel = submitTitleModelList.get(0);
@@ -169,11 +225,12 @@ public class SurveyServiceImpl implements SurveyService {
             submitSingleTitleDao.deleteSubmitSingleTitleBySubmitId(submitId);
             submitMultipleTitleDao.deleteSubmitMultipleTitleBySubmitId(submitId);
             submitTextTitleDao.deleteSubmitTextTitleBySubmitId(submitId);
+            submitFileTitleDao.deleteSubmitFileTitleBySubmitId(submitId);
             surveySubmitDao.deleteSurveySubmitById(submitId);
         }
         // 插入最新提交的答案
 
-        return submitSurveyAnswer(surveyTitleOptionModel,wxNickname,result);
+        return submitSurveyAnswer(surveyTitleOptionModel,wxNickname,wxOpenId,result);
     }
 
     @Override
@@ -190,9 +247,14 @@ public class SurveyServiceImpl implements SurveyService {
             surveyTitleOptionSummaryModel = surveyTitleOptionDao.getSurveySubmitSummary(surveyId);
             submitAndPercentCount(surveyTitleOptionSummaryModel);
             Collections.sort(surveyTitleOptionSummaryModel.getTitleList());
+            for(int i = 0; i < surveyTitleOptionSummaryModel.getTitleList().size(); i++){
+                TitleSummaryModel titleSummaryModel = surveyTitleOptionSummaryModel.getTitleList().get(i);
+                Collections.sort(titleSummaryModel.getOptionModelList());
+            }
             result.setData(surveyTitleOptionSummaryModel);
             result.setMessage(Message.Success.getType());
         }catch (Exception e){
+            e.printStackTrace();
             result.setMessage(e.getMessage());
         }
 
@@ -255,7 +317,7 @@ public class SurveyServiceImpl implements SurveyService {
         }
 
         try{
-            List<SurveyModel> surveyModelList = surveyDao.queryBySurveyNameAndCreator(surveyModel.getSurveyName(), surveyModel.getCreator());
+            List<SurveyModel> surveyModelList = surveyDao.queryBySurveyNameAndTypeAndCreator(surveyModel.getSurveyName(), surveyModel.getCreator(), surveyModel.getSurveyType());
             if(!Validator.isEmpty(surveyModelList)){
                 result.setMessage(Message.Exist.getType());
                 return result;
@@ -274,7 +336,6 @@ public class SurveyServiceImpl implements SurveyService {
             result.setMessage(Message.Error.getType());
         }
 
-
         return result;
     }
 
@@ -288,7 +349,7 @@ public class SurveyServiceImpl implements SurveyService {
         }
 
         try{
-            List<SurveyModel> surveyModelList = surveyDao.queryByName(surveyModel.getSurveyName());
+            List<SurveyModel> surveyModelList = surveyDao.queryByNameAndType(surveyModel.getSurveyName(),surveyModel.getSurveyType());
             if(!Validator.isEmpty(surveyModelList)){
                 for(SurveyModel tempSurveyModel : surveyModelList){
                     if (!tempSurveyModel.getId().equals(surveyModel.getId())) {
@@ -394,8 +455,251 @@ public class SurveyServiceImpl implements SurveyService {
         return this.deleteSubmits(titleModelList, surveyId);
     }
 
+    @Override
+    public XSSFWorkbook createWorkbook(String surveyId, int sortCols, List<TitleModel> titleModelList) {
+        XSSFWorkbook wb = new XSSFWorkbook();
+        XSSFSheet sheet = null;
+        if(Validator.isEmpty(surveyId) || Validator.isEmpty(titleModelList)){
+            return wb;
+        }
+        List<SurveyTitleOptionSubmitModel> surveyTitleOptionSubmitModelList = null;
+        surveyTitleOptionSubmitModelList = surveyTitleOptionDao.getSurveySubmitDetailList(surveyId);
+        if(Validator.isEmpty(surveyTitleOptionSubmitModelList)){
+            return wb;
+        }
+        // 将每张答卷转化成Map形式（key为titleId,value为答案）
+        List<Map<String,String>> submitList = new ArrayList<>();
+        SurveyTitleOptionSubmitModel surveyTitleOptionSubmitModel;
+        for(int i = 0; i < surveyTitleOptionSubmitModelList.size(); i++){
+            surveyTitleOptionSubmitModel = surveyTitleOptionSubmitModelList.get(i);
+            Map<String,String> submitMap = new HashMap<>();
+            for(TitleInfoModel titleInfoModel : surveyTitleOptionSubmitModel.getTitleList()){
 
-    private Map<String, SubmitTitleModel> convertSubmitTitleListToMap(List<SubmitSingleTitleModel> submitSingleTitleModelList, List<SubmitMultipleTitleModel> submitMultipleTitleModelList, List<SubmitTextTitleModel> submitTextTitleModelList) {
+                if(titleInfoModel.singleType()){
+                    List<OptionModel> optionModelList = titleInfoModel.getOptionModelList();
+                    if(!Validator.isEmpty(optionModelList)){
+                        submitMap.put(titleInfoModel.getId(),optionModelList.get(0).getOptionName());
+                    }
+                }
+
+                if(titleInfoModel.multipleType()){
+                    List<OptionModel> optionModelList = titleInfoModel.getOptionModelList();
+                    if(!Validator.isEmpty(optionModelList)){
+                        StringBuffer answer = new StringBuffer();
+                        for(OptionModel optionModel : optionModelList){
+                            answer.append(optionModel.getOptionName()).append("、");
+                        }
+                        submitMap.put(titleInfoModel.getId(),answer.toString());
+                    }
+                }
+
+                if(titleInfoModel.textType()){
+                    submitMap.put(titleInfoModel.getId(),titleInfoModel.getText());
+                }
+
+                if(titleInfoModel.imageType()){
+                    submitMap.put(titleInfoModel.getId(), UploadUtil.getImageVisitUrl()+titleInfoModel.getText());
+                }
+            }
+            submitList.add(submitMap);
+        }
+        // 多重排序
+        for(int i = 0; i < titleModelList.size(); i++){
+            String titleId = titleModelList.get(i).getId();
+        }
+        MultiColComparator multiColComparator = new MultiColComparator(titleModelList);
+        Collections.sort(submitList,multiColComparator);
+        // 创建工作表
+        sheet = wb.createSheet(surveyTitleOptionSubmitModelList.get(0).getSurveyName());
+        XSSFRow xssfRow;
+        XSSFCell xssfCell;
+
+        // 创建表头
+        xssfRow = sheet.createRow(0);
+        XSSFCellStyle cellStyle = wb.createCellStyle();
+        XSSFFont font = wb.createFont();
+        font.setBold(true);
+        cellStyle.setFont(font);
+        for(int i = 0; i < titleModelList.size(); i++){
+            xssfCell = xssfRow.createCell(i);
+            xssfCell.setCellValue(titleModelList.get(i).getTitle());
+            xssfCell.setCellStyle(cellStyle);
+        }
+
+        for(int i = 0; i < submitList.size(); i++){
+            xssfRow = sheet.createRow(i+1);
+            for(int j = 0; j < titleModelList.size(); j++){
+                String titleId = titleModelList.get(j).getId();
+                xssfCell = xssfRow.createCell(j);
+                xssfCell.setCellValue(submitList.get(i).get(titleId));
+            }
+        }
+        return wb;
+    }
+
+    @Override
+    public Result contestTitleImport(MultipartFile file, String surveyId) {
+        Result result = new Result();
+        result.setMessage(Message.Success.getType());
+
+        if(file.isEmpty()){
+            result.setMessage(Message.NoExist.getType());
+            return result;
+        }
+
+        if(Validator.isEmpty(surveyId)){
+            result.setMessage(Message.NotEmpty.getType());
+            return result;
+        }
+
+        List<TitleModel<OptionModel>> titleModelList = new ArrayList<>();
+        List<AnswerModel> answerModelList = new ArrayList<>();
+
+        result = readWorkbook(file,surveyId,titleModelList,answerModelList);
+        if(!result.getMessage().equals(Message.Success.getType())){
+            return result;
+        }
+
+        result = titleService.saveTitleAndAnswerModelList(titleModelList,answerModelList);
+
+        System.out.println(result.getMessage());
+
+        return result;
+    }
+
+    private Result readWorkbook(MultipartFile file, String surveyId, List<TitleModel<OptionModel>> titleModelList, List<AnswerModel> answerModelList){
+        Result result = new Result();
+        result.setMessage(Message.Success.getType());
+
+        InputStream inputStream = null;
+        Workbook workbook = null;
+        Sheet sheet = null;
+
+        TitleModel<OptionModel> titleModel = null;
+        OptionModel optionModel = null;
+        AnswerModel answerModel = null;
+
+        int titleSequence = 1;
+        int optionSequence = 0;
+        int answerSequence = 0;
+        boolean isAnswer = false;
+        String optionName = null;
+
+        Result<Integer> getStartedTitleSequenceResult = titleService.getStartedTitleSequence(surveyId);
+        if(getStartedTitleSequenceResult.getMessage().equals(Message.Success.getType())){
+            titleSequence = getStartedTitleSequenceResult.getData();
+        }else {
+            result.setMessage(getStartedTitleSequenceResult.getMessage());
+            return result;
+        }
+        try {
+            inputStream = file.getInputStream();
+            workbook = WorkbookFactory.create(inputStream);
+            sheet = workbook.getSheetAt(0);
+            for(int rowIndex = 0; rowIndex < sheet.getPhysicalNumberOfRows(); rowIndex++){
+                Row row = sheet.getRow(rowIndex);
+                if(row == null){
+                    continue;
+                }
+                Cell cell = row.getCell(0);
+                String cellVal = getString(cell);
+                if(Validator.isEmpty(cellVal)){
+                    result.setMessage(Message.NotEmpty.getType());
+                    return result;
+                }
+
+                // 如果是题目
+                if(cellVal.startsWith(TitleFlag.Multiple.getFlag()) || cellVal.startsWith(TitleFlag.Single.getFlag()) || cellVal.startsWith(TitleFlag.Text.getFlag())){
+                    titleModel = new TitleModel<OptionModel>();
+                    titleModel.setId(UUID.randomUUID().toString());
+                    titleModel.setTitle(cellVal.substring(2));
+                    titleModel.setSurveyId(surveyId);
+                    titleModel.setTitleSequence(titleSequence);
+                    titleModel.setRequired(RequiredFlag.False.getFlag());
+                    titleModel.setIsNameColumn(NameColumn.NO.getVal());
+                    if(cellVal.startsWith(TitleFlag.Multiple.getFlag())){
+                        titleModel.setTitleType(TitleType.MultipleTitle.getVal());
+                    }
+                    if(cellVal.startsWith(TitleFlag.Single.getFlag())){
+                        titleModel.setTitleType(TitleType.SingleTitle.getVal());
+                    }
+                    if(cellVal.startsWith(TitleFlag.Text.getFlag())){
+                        titleModel.setTitleType(TitleType.Text.getVal());
+                    }
+                    titleSequence++;
+                    titleModelList.add(titleModel);
+                    optionSequence = 1;
+                    answerSequence = 1;
+                }else{// 如果是选项或者答案
+                    if(titleModel.multipleType() || titleModel.singleType()){ // 如果是多选题或者是单选题
+                        optionName = cellVal;
+                        isAnswer = false;
+                        if(Validator.isEmpty(titleModel.getOptionModelList())){
+                            titleModel.setOptionModelList(new ArrayList());
+                        }
+                        if(cellVal.endsWith(AnswerFlag.True.getFlag())){
+                            isAnswer = true;
+                            optionName = cellVal.substring(0,cellVal.length()-1);
+                        }
+
+                        optionModel = new OptionModel(UUID.randomUUID().toString(),titleModel.getId(),optionName,optionSequence);
+                        titleModel.getOptionModelList().add(optionModel);
+                        optionSequence ++;
+                        if(isAnswer){
+                            answerModel = new AnswerModel(UUID.randomUUID().toString(),titleModel.getId(),optionModel.getId(),answerSequence);
+                            answerModelList.add(answerModel);
+                            answerSequence ++;
+                        }
+                    }else{ // 如果是填空题
+                        answerModel = new AnswerModel(UUID.randomUUID().toString(),titleModel.getId(),cellVal,answerSequence);
+                        answerModelList.add(answerModel);
+                        answerSequence ++;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.setMessage(Message.Error.getType());
+        }finally {
+            if(inputStream != null){
+                try {
+                    inputStream.close();
+                } catch (Exception e) {
+                    result.setMessage(Message.FileStreamCloseFail.getType());
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return result;
+    }
+
+    private  String getString(Cell cell) {
+        if (cell == null) {
+            return "";
+        }
+        if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+            return String.valueOf(cell.getNumericCellValue());
+        } else if (cell.getCellType() == Cell.CELL_TYPE_BOOLEAN) {
+            return String.valueOf(cell.getBooleanCellValue());
+        } else {
+            return cell.getStringCellValue();
+        }
+    }
+
+    private Map<String, SubmitTitleModel> convertSubmitTitleListToMap(List<SubmitTitleModel> submitTitleModelList, Map<String, SubmitTitleModel> submitTitleModelMap){
+        if(Validator.isEmpty(submitTitleModelMap)){
+            submitTitleModelMap = new HashMap<>();
+        }
+
+        for(SubmitTitleModel submitTitleModel : submitTitleModelList){
+            submitTitleModelMap.put(submitTitleModel.getTitleId(),submitTitleModel);
+        }
+
+        return submitTitleModelMap;
+    }
+
+    private Map<String, SubmitTitleModel> convertSubmitTitleListToMap(List<SubmitSingleTitleModel> submitSingleTitleModelList, List<SubmitMultipleTitleModel> submitMultipleTitleModelList, List<SubmitTextTitleModel> submitTextTitleModelList,  List<SubmitFileTitleModel> submitFileTitleModelList) {
         Map<String, SubmitTitleModel> submitTitleModelMap = new HashMap<>();
 
         for(SubmitSingleTitleModel submitSingleTitleModel : submitSingleTitleModelList){
@@ -406,6 +710,10 @@ public class SurveyServiceImpl implements SurveyService {
         }
         for(SubmitTextTitleModel submitTextTitleModel : submitTextTitleModelList){
             submitTitleModelMap.put(submitTextTitleModel.getTitleId(), submitTextTitleModel);
+        }
+
+        for(SubmitFileTitleModel submitFileTitleModel : submitFileTitleModelList){
+            submitTitleModelMap.put(submitFileTitleModel.getTitleId(), submitFileTitleModel);
         }
 
         return submitTitleModelMap;
@@ -437,22 +745,28 @@ public class SurveyServiceImpl implements SurveyService {
                 List<OptionModel> optionModelList = titleInfoModel.getOptionModelList();
                 List<String> optionIdList = ((SubmitMultipleTitleModel)submitTitleModel).getOptionIdList();
                 for(OptionModel optionModel : optionModelList){
-                    for(String selectedOptionId : optionIdList) {
-                        if (optionModel.getId().equals(selectedOptionId)) {
+                    for(String selectedOptionId : optionIdList){
+                        if (optionModel.getId().equals(selectedOptionId)){
                             optionModel.setSelected(true);
                         }
                     }
                 }
             }
 
-            if(titleInfoModel.textType()){
+            if(titleInfoModel.textType() ){
                 String text = ((SubmitTextTitleModel) submitTitleModel).getText();
                 titleInfoModel.setText(text);
+            }
+
+            if(titleInfoModel.imageType()){
+                String fileName = ((SubmitFileTitleModel) submitTitleModel).getFileName();
+                titleInfoModel.setText(fileName);
             }
         }
     }
 
     private void initTextValue(SurveyTitleOptionModel<TitleInfoModel> surveyTitleOptionModel){
+
         if(Validator.isEmpty(surveyTitleOptionModel)){
             return;
         }
@@ -500,10 +814,10 @@ public class SurveyServiceImpl implements SurveyService {
                 if(! submitSurveyMap.containsKey(titleId)){
                     continue;
                 }
-                String titleType = titleStatisticsModel.getTitleType();
 
-                // 如果是填空题
-                if(titleType.equals(TitleType.Text.getVal())){
+
+                // 如果是填空题 或者文件题
+                if(titleStatisticsModel.textType() || titleStatisticsModel.imageType()){
                     String text = (String) submitSurveyMap.get(titleId);
                     List<TextNameModel> textNameList =  titleStatisticsModel.getTextNameList();
                     if(textNameList == null){
@@ -514,14 +828,17 @@ public class SurveyServiceImpl implements SurveyService {
                     if(titleId.equals(statisticsTitleId)){
                         textNameModel = new TextNameModel();
                         textNameModel.setName(name);
+                        textNameList.add(textNameModel);
                     }else {
-                        textNameModel = new TextNameModel(text,name);
+                        if(!Validator.isEmpty(text)){
+                            textNameModel = new TextNameModel(text,name);
+                            textNameList.add(textNameModel);
+                        }
                     }
-                    textNameList.add(textNameModel);
                 }
 
                 // 如果是选择题
-                if(titleType.equals(TitleType.MultipleTitle.getVal()) || titleType.equals(TitleType.SingleTitle.getVal())){
+                if(titleStatisticsModel.multipleType() || titleStatisticsModel.singleType()){
                     List<OptionStatisticsModel> optionStatisticsList = titleStatisticsModel.getOptionModelList();
                     Map<String,String> optionMap = (Map<String,String>)submitSurveyMap.get(titleId);
                     if(Validator.isEmpty(optionStatisticsList)){
@@ -548,14 +865,14 @@ public class SurveyServiceImpl implements SurveyService {
             String titleId = titleStatisticsModel.getId();
             String titleType = titleStatisticsModel.getTitleType();
 
-            if(titleType.equals(TitleType.Text.getVal())) {
+            if(titleStatisticsModel.textType() || titleStatisticsModel.imageType()) {
                 List<TextNameModel> textNameList = titleStatisticsModel.getTextNameList();
                 if (textNameList != null) {
                     Collections.sort(textNameList);
                 }
             }
 
-            if(titleType.equals(TitleType.MultipleTitle.getVal()) || titleType.equals(TitleType.SingleTitle.getVal())){
+            if(titleStatisticsModel.multipleType() || titleStatisticsModel.singleType()){
                 List<OptionStatisticsModel> optionStatisticsList = titleStatisticsModel.getOptionModelList();
                 if(Validator.isEmpty(optionStatisticsList)){
                     continue;
@@ -582,12 +899,11 @@ public class SurveyServiceImpl implements SurveyService {
             Map<String,Object> titleAnswerMap = new HashMap<>();
             submitSurveysMap.put(submitId,titleAnswerMap);
             for(TitleInfoModel submitTitleModel : submitTitleList){
-                String titleType = submitTitleModel.getTitleType();
-                if(titleType.equals(TitleType.Text.getVal())){
+                if(submitTitleModel.textType() || submitTitleModel.imageType()){
                     titleAnswerMap.put(submitTitleModel.getId(),submitTitleModel.getText());
                 }
 
-                if(titleType.equals(TitleType.SingleTitle.getVal()) || titleType.equals(TitleType.MultipleTitle.getVal())){
+                if(submitTitleModel.singleType() || submitTitleModel.multipleType()){
                     List<OptionModel> optionModelList = submitTitleModel.getOptionModelList();
                     if(Validator.isEmpty(optionModelList)){
                         continue;
@@ -655,14 +971,17 @@ public class SurveyServiceImpl implements SurveyService {
         List<TitleModel> singleTitleModelList = new ArrayList<>();
         List<TitleModel> multipleTitleModelList = new ArrayList<>();
         List<TitleModel> textTitleModelList = new ArrayList<>();
+        List<TitleModel> imageTitleModelList = new ArrayList<>();
         if(!Validator.isEmpty(titleModelList)) {
             for (int i = 0; i < titleModelList.size(); i++) {
-                if (titleModelList.get(i).getTitleType().equals(TitleType.SingleTitle.getVal())) {
+                if (titleModelList.get(i).singleType()) {
                     singleTitleModelList.add(titleModelList.get(i));
-                } else if (titleModelList.get(i).getTitleType().equals(TitleType.MultipleTitle.getVal())) {
+                } else if (titleModelList.get(i).multipleType()) {
                     multipleTitleModelList.add(titleModelList.get(i));
-                } else {
+                } else if(titleModelList.get(i).textType()){
                     textTitleModelList.add(titleModelList.get(i));
+                }else{
+                    imageTitleModelList.add(titleModelList.get(i));
                 }
             }
         }
@@ -670,6 +989,7 @@ public class SurveyServiceImpl implements SurveyService {
         titleModelMap.put(TitleType.SingleTitle.getVal(),singleTitleModelList);
         titleModelMap.put(TitleType.MultipleTitle.getVal(),multipleTitleModelList);
         titleModelMap.put(TitleType.Text.getVal(),textTitleModelList);
+        titleModelMap.put(TitleType.Image.getVal(),imageTitleModelList);
 
         return titleModelMap;
     }
@@ -682,6 +1002,7 @@ public class SurveyServiceImpl implements SurveyService {
         List<TitleModel> singleTitleModelList = titleModelMap.get(TitleType.SingleTitle.getVal());
         List<TitleModel> multipleTitleModelList = titleModelMap.get(TitleType.MultipleTitle.getVal());
         List<TitleModel> textTitleModelList = titleModelMap.get(TitleType.Text.getVal());
+        List<TitleModel> imageTitleModelList = titleModelMap.get(TitleType.Image.getVal());
 
         //删除surveySubmit
         int rows = surveySubmitDao.deleteSurveySubmitsBySurveyId(surveyId);
@@ -689,6 +1010,7 @@ public class SurveyServiceImpl implements SurveyService {
             result.setMessage(Message.DeleteError.getType());
             return result;
         }
+
         // 删除singleSubmits
         if(!Validator.isEmpty(singleTitleModelList)){
             rows = submitSingleTitleDao.deleteSubmitSingleByTitleId(singleTitleModelList);
@@ -714,32 +1036,37 @@ public class SurveyServiceImpl implements SurveyService {
             }
         }
 
+        // 删除image
+        if(!Validator.isEmpty(imageTitleModelList)){
+            rows = submitFileTitleDao.deleteSubmitFileByTitleId(imageTitleModelList);
+            if(rows < 0){
+                result.setMessage(Message.DeleteError.getType());
+                return result;
+            }
+        }
+
         result.setMessage(Message.Success.getType());
 
         return result;
     }
 
 
-    private Result submitSurveyAnswer(SurveyTitleOptionModel surveyTitleOptionModel,String wxNickname, Result result) {
+    private Result submitSurveyAnswer(SurveyTitleOptionModel surveyTitleOptionModel,String wxNickname,String wxOpenId,Result result) {
         List<TitleInfoModel> titleModelList = surveyTitleOptionModel.getTitleList();
         List<SubmitOptionModel> submitSingleModelList = new ArrayList<>();
         List<SubmitOptionModel> submitMultipleModelList = new ArrayList<>();
         List<SubmitTextTitleModel> submitTextTitleModelList = new ArrayList<>();
+        List<SubmitFileTitleModel> submitFileTitleModelList = new ArrayList<>();
 
         SurveySubmitModel surveySubmitModel = null;
-        if(!Validator.isEmpty(wxNickname)){
-            surveySubmitModel = new SurveySubmitModel(UUID.randomUUID().toString(),surveyTitleOptionModel.getId(),"",wxNickname);
-        }else{
-            surveySubmitModel = new SurveySubmitModel(UUID.randomUUID().toString(),surveyTitleOptionModel.getId(),"","");
-        }
-
+        surveySubmitModel = new SurveySubmitModel(UUID.randomUUID().toString(),surveyTitleOptionModel.getId(),"",Validator.isEmpty(wxNickname)?"":wxNickname, Validator.isEmpty(wxOpenId)?"":wxOpenId);
         TitleInfoModel titleInfoModel = null;
         for(int i = 0; i < titleModelList.size(); i++){
             titleInfoModel = titleModelList.get(i);
-            if(titleInfoModel.getTitleType().equals(TitleType.Text.getVal())){
+            if(titleInfoModel.textType()){
                 SubmitTextTitleModel submitTextTitleModel = new SubmitTextTitleModel(UUID.randomUUID().toString(),surveySubmitModel.getId(),titleInfoModel.getId(),titleInfoModel.getText());
                 submitTextTitleModelList.add(submitTextTitleModel);
-            }else if(titleInfoModel.getTitleType().equals(TitleType.SingleTitle.getVal())){
+            }else if(titleInfoModel.singleType()){
                 List<OptionModel> optionModelList = titleInfoModel.getOptionModelList();
                 if(Validator.isEmpty(optionModelList)){
                     continue;
@@ -751,7 +1078,7 @@ public class SurveyServiceImpl implements SurveyService {
                         break;
                     }
                 }
-            }else if(titleInfoModel.getTitleType().equals(TitleType.MultipleTitle.getVal())){
+            }else if(titleInfoModel.multipleType()){
                 List<OptionModel> optionModelList = titleInfoModel.getOptionModelList();
                 if(Validator.isEmpty(optionModelList)){
                     continue;
@@ -762,6 +1089,9 @@ public class SurveyServiceImpl implements SurveyService {
                         submitMultipleModelList.add(submitOptionModel);
                     }
                 }
+            }else{
+                SubmitFileTitleModel submitFileTitleModel = new SubmitFileTitleModel(UUID.randomUUID().toString(),surveySubmitModel.getId(),titleInfoModel.getId(),titleInfoModel.getText());
+                submitFileTitleModelList.add(submitFileTitleModel);
             }
         }
 
@@ -770,6 +1100,7 @@ public class SurveyServiceImpl implements SurveyService {
         if(!Validator.isEmpty(submitSingleModelList)){
             submitSingleTitleDao.insertSubmitSingleTitleList(submitSingleModelList);
         }
+
         if(!Validator.isEmpty(submitMultipleModelList)){
             submitMultipleTitleDao.insertSubmitMultipleTitleList(submitMultipleModelList);
         }
@@ -778,8 +1109,36 @@ public class SurveyServiceImpl implements SurveyService {
             submitTextTitleDao.insertSubmitTextTitleList(submitTextTitleModelList);
         }
 
+        if(!Validator.isEmpty(submitFileTitleModelList)){
+            submitFileTitleDao.insertSubmitFileTitleList(submitFileTitleModelList);
+        }
+
         result.setData(surveyTitleOptionModel);
         result.setMessage(Message.Success.getType());
         return result;
+    }
+
+    private class MultiColComparator implements Comparator<Map<String,String>> {
+
+        List<TitleModel> titleModelList;
+
+        public MultiColComparator(List<TitleModel> titleModelList){
+            this.titleModelList = titleModelList;
+        }
+
+        @Override
+        public int compare(Map<String, String> o1, Map<String, String> o2){
+
+            String titleId = "";
+            for(TitleModel titleModel : titleModelList){
+                titleId = titleModel.getId();
+                if(!o1.get(titleId).equals(o2.get(titleId))){
+                    return o1.get(titleId).compareTo(o2.get(titleId));
+                }
+
+            }
+
+            return o1.get(titleId).compareTo(o2.get(titleId));
+        }
     }
 }

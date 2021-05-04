@@ -2,7 +2,6 @@ package com.sg.survey.title.option;
 
 import com.alibaba.fastjson.JSON;
 import com.sg.survey.Result;
-import com.sg.survey.title.TitleModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;

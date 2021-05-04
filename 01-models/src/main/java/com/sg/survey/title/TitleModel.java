@@ -1,6 +1,6 @@
 package com.sg.survey.title;
 
-import com.sg.survey.title.option.OptionModel;
+
 
 import java.util.List;
 
@@ -93,6 +93,10 @@ public class TitleModel <T>  implements Comparable<TitleModel>{
 
     public boolean multipleType(){
         return this.titleType.equals(TitleType.MultipleTitle.getVal());
+    }
+
+    public boolean imageType(){
+        return this.titleType.equals(TitleType.Image.getVal());
     }
 
     public boolean nameSetting(){

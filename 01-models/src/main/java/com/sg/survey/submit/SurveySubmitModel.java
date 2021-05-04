@@ -5,7 +5,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.Entity;
-import java.util.UUID;
 
 /**
  * Created by jiuge on 2020/5/7.
@@ -19,16 +18,18 @@ public class SurveySubmitModel {
     private String  surveyId;
     private String submitter;
     private String wxNickname;
+    private String wxOpenId;
 
     public SurveySubmitModel(){
 
     }
 
-    public SurveySubmitModel(String id,String surveyId,String submitter,String wxNickname){
+    public SurveySubmitModel(String id,String surveyId,String submitter,String wxNickname,String wxOpenId){
         this.id = id;
-        this.surveyId = surveyId;
-        this.submitter = submitter;
+        this.surveyId   = surveyId;
+        this.submitter  = submitter;
         this.wxNickname = wxNickname;
+        this.wxOpenId   = wxOpenId;
     }
 
     public String getId() {
@@ -61,5 +62,13 @@ public class SurveySubmitModel {
 
     public void setWxNickname(String wxNickname) {
         this.wxNickname = wxNickname;
+    }
+
+    public String getWxOpenId() {
+        return wxOpenId;
+    }
+
+    public void setWxOpenId(String wxOpenId) {
+        this.wxOpenId = wxOpenId;
     }
 }

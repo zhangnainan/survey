@@ -21,11 +21,17 @@ public interface SurveyDao {
 
     public List<SurveyModel> queryByName(String surveyName);
 
+    public List<SurveyModel> queryByNameAndType(@Param("surveyName") String surveyName, @Param("surveyType") String surveyType);
+
     public List<SurveyModel> queryBySurveyNameAndCreator(@Param("surveyName") String surveyName, @Param("creator") String creator);
+
+    public List<SurveyModel> queryBySurveyNameAndTypeAndCreator(@Param("surveyName") String surveyName, @Param("creator") String creator, @Param("surveyType") String surveyType);
 
     public List<SurveyModel> queryAll();
 
     public List<SurveyModel> querySurveyListByCreator(String creator);
+
+    public List<SurveyModel> querySurveyListByCreatorAndType(@Param("creator") String creator, @Param("surveyType") String surveyType);
 
     public int getSubmitsCountById(String surveyId);
 

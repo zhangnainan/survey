@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sg.survey.title.SurveyTextTitleDao">
+
+    <insert id="insertSurveyTextTitle" parameterType="SurveyTextTitleModel">
+        insert into survey_titles(id,survey_id,title,title_type,required,index) values(#{id},#{surveyId},#{title},#{titleType},#{required},#{index})
+    </insert>
+
+    <insert id="insertSurveyTextTitleList" parameterType="java.util.List" useGeneratedKeys="false">
+        insert into survey_titles(id,survey_id,title,title_type,required,index) values
+        <foreach collection="list" item="item"  separator=",">
+            (#{item.id},#{item.surveyId},#{item.title},#{item.titleType},#{item.required},#{item.index})
+        </foreach>
+    </insert>
+
+    <delete id="deleteSurveyTextTitleById" parameterType="java.lang.String">
+        delete from survey_titles where id=#{id}
+    </delete>
+
+    <delete id="deleteSurveyTextTitleBySurveyId" parameterType="java.lang.String">
+        delete from survey_titles where survey_id=#{surveyId}
+    </delete>
+
+    <update id="updateSurveyTextTitleModel" parameterType="SurveyTextTitleModel">
+        update survey_titles set survey_id=#{surveyId},title=#{title},title_type=#{titleType},required=#{required},index=#{index}
+    </update>
+
+    <select id="querySurveyTextTitleBySurveyId" parameterType="java.lang.String" resultType="java.util.List">
+        select * from survey_titles where survey_id=#{surveyId}
+    </select>
+
+</mapper>

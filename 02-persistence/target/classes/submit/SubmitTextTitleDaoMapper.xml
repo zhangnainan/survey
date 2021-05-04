@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sg.survey.submit.SubmitTextTitleDao">
+    <insert id="insertSubmitTextTitle" parameterType="SubmitTextTitleModel">
+        insert into submits_text(id,submit_id,title_id,text) values(#{id},#{submitId},#{titleId},#{text})
+    </insert>
+
+    <insert id="insertSubmitTextTitleList" parameterType="java.util.List">
+        insert into submits_text(id,submit_id,title_id,text) values
+        <foreach collection="list" index="index" item="item" separator="," open="" close="" >
+            (#{item.id},#{item.submitId},#{item.titleId},#{item.text})
+        </foreach>
+    </insert>
+    <delete id="deleteSubmitTextTitleBySubmitId" parameterType="java.lang.String">
+        delete from submits_text where submit_id=#{submitId}
+    </delete>
+
+    <delete id="deleteSubmitTextByTitleId" parameterType="java.util.List">
+        <foreach collection="list" separator=";" item="titleModel" open="" close="" index="index">
+            delete from submits_text where title_id=#{titleModel.id}
+        </foreach>
+    </delete>
+
+    <resultMap id="SubmitTextTitleModelMap" type="SubmitTextTitleModel" autoMapping="true">
+        <id column="id" property="id"/>
+        <result column="submit_id"  property="submitId"/>
+        <result column="title_id"  property="titleId"/>
+        <result column="text" property="text" />
+    </resultMap>
+
+    <select id="querySubmitTextTitleListBySubmitId" parameterType="java.lang.String" resultMap="SubmitTextTitleModelMap">
+        select * from submits_text where submit_id=#{submitId}
+    </select>
+</mapper>

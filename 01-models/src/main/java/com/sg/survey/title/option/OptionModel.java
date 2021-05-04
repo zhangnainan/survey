@@ -12,13 +12,14 @@ import javax.persistence.Entity;
 @Entity
 @Component("survey.title.option.option.model")
 @Scope(BeanDefinition.SCOPE_PROTOTYPE)
-public class OptionModel {
+public class OptionModel implements Comparable<OptionModel>{
 
     protected String id;
     protected String titleId;
     protected String optionName;
     protected int optionSequence;
     protected boolean selected;
+    protected boolean corrected;
 
 
     public OptionModel(){
@@ -72,5 +73,16 @@ public class OptionModel {
         this.selected = selected;
     }
 
+    public boolean isCorrected() {
+        return corrected;
+    }
 
+    public void setCorrected(boolean corrected) {
+        this.corrected = corrected;
+    }
+
+    @Override
+    public int compareTo(OptionModel o) {
+        return this.getOptionSequence()-o.getOptionSequence();
+    }
 }

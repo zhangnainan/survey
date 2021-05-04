@@ -2,7 +2,6 @@ package com.sg.survey;
 
 import com.sg.survey.submit.SubmitSummaryModel;
 import com.sg.survey.title.TitleInfoModel;
-import com.sg.survey.title.TitleStatisticsModel;
 
 import java.util.List;
 

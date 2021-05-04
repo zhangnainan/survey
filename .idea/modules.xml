@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/00-common/00-common.iml" filepath="$PROJECT_DIR$/00-common/00-common.iml" />
+      <module fileurl="file://$PROJECT_DIR$/01-models/01-models.iml" filepath="$PROJECT_DIR$/01-models/01-models.iml" />
+      <module fileurl="file://$PROJECT_DIR$/02-persistence/02-persistence.iml" filepath="$PROJECT_DIR$/02-persistence/02-persistence.iml" />
+      <module fileurl="file://$PROJECT_DIR$/03-service/03-service.iml" filepath="$PROJECT_DIR$/03-service/03-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/04-web/04-web.iml" filepath="$PROJECT_DIR$/04-web/04-web.iml" />
+      <module fileurl="file://$PROJECT_DIR$/survey.iml" filepath="$PROJECT_DIR$/survey.iml" />
+    </modules>
+  </component>
+</project>

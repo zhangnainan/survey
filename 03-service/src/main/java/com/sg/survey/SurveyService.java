@@ -1,6 +1,10 @@
 package com.sg.survey;
 
-import com.sg.survey.submit.SurveySubmitVo;
+import com.sg.survey.title.TitleModel;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 /**
  * Created by jiuge on 2020/5/9.
@@ -15,6 +19,23 @@ public interface SurveyService {
     public Result getSurveyModelListByCreator(String creator);
 
     /**
+     * 获取问卷或知识竞赛列表
+     *
+     * @param creator
+     * @param surveyType
+     * @return
+     */
+    public Result getSurveyModelListByCreatorAndType(String creator, String surveyType);
+
+    /**
+     * 单纯获取调查问卷信息
+     *
+     * @param surveyId
+     * @return
+     */
+    public Result getSurveyInfo(String surveyId);
+
+    /**
      * 获取问卷详细信息
      *
      * @param surveyId
@@ -23,13 +44,13 @@ public interface SurveyService {
     public Result getSurveyTitleOptionModel(String surveyId);
 
     /**
-     * 通过surveyId 和 userNickName 获取问卷信息。
      *
      * @param surveyId
-     * @param userNickName
+     * @param wxNickname
+     * @param wxOpenId
      * @return
      */
-    public Result getSurveyTitleOptionModel(String surveyId, String userNickName);
+    public Result getSurveyTitleOptionModel(String surveyId, String wxNickname, String wxOpenId);
 
 
     /**
@@ -45,9 +66,10 @@ public interface SurveyService {
      *
      * @param surveyTitleOptionModel
      * @param wxNickname
+     * @param wxOpenId
      * @return
      */
-    public Result submitSurveyTitleOptionModel(SurveyTitleOptionModel surveyTitleOptionModel, String wxNickname);
+    public Result submitSurveyTitleOptionModel(SurveyTitleOptionModel surveyTitleOptionModel, String wxNickname, String wxOpenId);
 
     /**
      * 获取问卷结果汇总
@@ -117,30 +139,22 @@ public interface SurveyService {
      */
     public Result clearSurvey(String surveyId);
 
-//    /**
-//     * 获取问卷的详细信息
-//     *
-//     * @param surveyId
-//     * @return
-//     */
-//    public Result getSurveyVo(String surveyId);
-//
-//
-//    /**
-//     * 提交问卷答案
-//     *
-//     * @param surveySubmitVo
-//     * @return
-//     */
-//    public Result submitSurveyVo(SurveySubmitVo surveySubmitVo);
-//
-//    /**
-//     * 获取问卷答案列表
-//     *
-//     * @param surveyId
-//     * @return
-//     */
-//    public Result getSurveySubmitVoList(String surveyId);
+    /**
+     * 创建Excel工作表
+     *
+     * @param surveyId
+     * @param sortCols
+     * @param titleModelList
+     * @return
+     */
+    public XSSFWorkbook createWorkbook(String surveyId, int sortCols, List<TitleModel> titleModelList);
 
 
+    /**
+     * 竞赛题目导入
+     *
+     * @param file
+     * @return
+     */
+    public Result contestTitleImport(MultipartFile file, String surveyId);
 }
