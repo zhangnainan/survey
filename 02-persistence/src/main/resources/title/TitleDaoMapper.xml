@@ -41,7 +41,7 @@
         <result column="required" property="required" />
         <result column="title_sequence" property="titleSequence"/>
         <result column="is_name_column" property="isNameColumn" />
-        <collection property="optionModelList" javaType="java.util.List" ofType="OptionModel" >
+        <collection property="optionModelList" javaType="java.util.List" ofType="OptionModel"  >
             <id column="optionId" property="id"/>
             <result column="title_id" property="titleId" />
             <result column="option_name" property="optionName"/>
@@ -55,6 +55,37 @@
                from (select * from survey_titles where survey_id = #{surveyId} order by title_sequence limit ${start},${pageSize}) st
                left join title_options tos on st.id = tos.title_id
                order by st.title_sequence,tos.option_sequence;
+    </select>
+
+    <resultMap id="contestTitleMap" type="TitleInfoModel" autoMapping="true">
+        <id column="id" property="id" />
+        <result column="survey_id" property="surveyId" />
+        <result column="title" property="title" />
+        <result column="title_type" property="titleType" />
+        <result column="required" property="required" />
+        <result column="title_sequence" property="titleSequence"/>
+        <result column="is_name_column" property="isNameColumn" />
+        <collection property="optionModelList" javaType="java.util.List" ofType="OptionModel" column="id" select="getRelatedOptionModel" >
+            <id column="optionId" property="id"/>
+            <result column="title_id" property="titleId" />
+            <result column="option_name" property="optionName"/>
+            <result column="option_sequence" property="optionSequence"/>
+        </collection>
+    </resultMap>
+
+    <select id="getContestTitle" resultMap="contestTitleMap" >
+        select * from survey_titles where survey_id=#{surveyId} order by rand() limit ${answerTitleNum}
+    </select>
+
+    <resultMap id="optionModelMap"  type="OptionModel" autoMapping="true" >
+        <id column="optionId" property="id"/>
+        <result column="title_id" property="titleId" />
+        <result column="option_name" property="optionName"/>
+        <result column="option_sequence" property="optionSequence"/>
+    </resultMap>
+
+    <select id="getRelatedOptionModel" parameterType="java.lang.String" resultMap="optionModelMap">
+        select id as optionId,title_id,option_name,option_sequence from title_options where title_id=#{id} order by option_sequence
     </select>
 
     <!--
@@ -116,6 +147,15 @@
                left join title_options tos on st.id = tos.title_id
                order by st.title_sequence,tos.option_sequence;
     </select>
+
+
+    <select id="getTitleAnswerByIds" resultMap="titleAnswerModelMap" >
+         select * from survey_titles where id in
+        <foreach collection="list" open="(" close=")" separator="," item="item" index="index">
+           #{item}
+        </foreach>
+    </select>
+
     <resultMap id="answerModelMap" type="AnswerModel" autoMapping="true">
         <id column="answerId" property="id" />
         <result column="title_id" property="titleId" />

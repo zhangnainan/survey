@@ -9,14 +9,14 @@ import java.util.List;
  */
 public interface SubmitTextTitleDao {
 
-    public int insertSubmitTextTitle(SubmitTextTitleModel submitTextTitleModel);
+    int insertSubmitTextTitle(SubmitTextTitleModel submitTextTitleModel);
 
-    public int insertSubmitTextTitleList(List<SubmitTextTitleModel> submitTextTitleModelList);
+    int insertSubmitTextTitleList(List<SubmitTextTitleModel> submitTextTitleModelList);
 
-    public int deleteSubmitTextTitleBySubmitId(String submitId);
+    int deleteSubmitTextTitleBySubmitId(String submitId);
 
-    public int deleteSubmitTextByTitleId(List<TitleModel> titleModelList);
+    int deleteSubmitTextByTitleId(List<TitleModel> titleModelList);
 
-    public List<SubmitTextTitleModel> querySubmitTextTitleListBySubmitId(String submitId);
+    List<SubmitTextTitleModel> querySubmitTextTitleListBySubmitId(String submitId);
 
 }

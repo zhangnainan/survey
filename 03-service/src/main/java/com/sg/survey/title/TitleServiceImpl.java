@@ -91,6 +91,22 @@ public class TitleServiceImpl implements TitleService {
     }
 
     @Override
+    public Result getContestTitle(String surveyId, int answerTitleNum) {
+        Result result = new Result();
+
+        if(Validator.isEmpty(surveyId) || answerTitleNum <= 0){
+            result.setMessage(Message.ParameterIllegal.getType());
+            return result;
+        }
+
+        List<TitleModel<OptionModel>> contestTitleList = titleDao.getContestTitle(surveyId, answerTitleNum);
+        Collections.sort(contestTitleList);
+        result.setData(contestTitleList);
+        result.setMessage(Message.Success.getType());
+        return result;
+    }
+
+    @Override
     public Result getTitlePage(String surveyId, String surveyType, int pageSize, int start) {
 
         Result result = new Result();
@@ -586,6 +602,17 @@ public class TitleServiceImpl implements TitleService {
         List<String> optionNameList = titleModel.getOptionModelList().stream().map(OptionModel::getOptionName)
                 .collect(Collectors.toList());
         long count = optionNameList.stream().distinct().count();
+
+        Set<String> nameSet = new HashSet<>();
+        for(int i = 0; i < optionNameList.size(); i++){
+            String name = optionNameList.get(i);
+            if(nameSet.contains(name)){
+                System.out.println("重复的Option："+name);
+            }else{
+                nameSet.add(name);
+            }
+        }
+
         if (optionNameList.size() > count) {
             return true;
         }
@@ -598,6 +625,18 @@ public class TitleServiceImpl implements TitleService {
         List<String> existedTitleNameList = existedTitleModelList.stream().map(TitleModel::getTitle).collect(Collectors.toList());
         List<String> titleNameList = newTitleNameList;
         titleNameList.addAll(existedTitleNameList);
+        /*
+        Set<String> nameSet = new HashSet<>();
+        for(int i = 0; i < titleNameList.size(); i++){
+            String name = titleNameList.get(i);
+            if(nameSet.contains(name)){
+                System.out.println("重复的题目："+name);
+            }else{
+                nameSet.add(name);
+            }
+        }
+
+         */
         long count = titleNameList.stream().distinct().count();
         if(titleNameList.size() > count){
             return true;

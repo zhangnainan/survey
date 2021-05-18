@@ -7,13 +7,13 @@ import java.util.List;
  */
 public interface SurveySingleTitleDao {
 
-    public int insertSurveySingleTitle(SurveySingleTitleModel surveySingleTitleModel);
+    int insertSurveySingleTitle(SurveySingleTitleModel surveySingleTitleModel);
 
-    public int insertSurveySingleTitleList(List<SurveySingleTitleModel> surveySingleTitleModelList);
+    int insertSurveySingleTitleList(List<SurveySingleTitleModel> surveySingleTitleModelList);
 
-    public int deleteSurveySingleTitleById(String id);
+    int deleteSurveySingleTitleById(String id);
 
-    public int deleteSurveySingleTitleBySurveyId(String surveyId);
+    int deleteSurveySingleTitleBySurveyId(String surveyId);
 
-    public List<SurveySingleTitleModel> querySurveySingleTitleBySurveyId(String surveyId);
+    List<SurveySingleTitleModel> querySurveySingleTitleBySurveyId(String surveyId);
 }

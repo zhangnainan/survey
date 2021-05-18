@@ -1,13 +1,14 @@
 package com.sg.survey;
 
-import com.alibaba.fastjson.JSON;
 import com.sg.survey.submit.*;
 import com.sg.survey.title.*;
+import com.sg.survey.title.answer.AnswerDao;
 import com.sg.survey.title.answer.AnswerModel;
 import com.sg.survey.title.option.OptionDao;
 import com.sg.survey.title.option.OptionModel;
 import com.sg.survey.title.option.OptionStatisticsModel;
 import com.sg.survey.title.option.OptionSummaryModel;
+import com.sg.survey.util.DateFormatUtil;
 import com.sg.survey.util.UploadUtil;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.*;
@@ -17,8 +18,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.text.Collator;
 import java.text.DecimalFormat;
 import java.util.*;
@@ -45,6 +46,9 @@ public class SurveyServiceImpl implements SurveyService {
     private OptionDao optionDao;
 
     @Autowired
+    private AnswerDao answerDao;
+
+    @Autowired
     private SurveySubmitDao surveySubmitDao;
 
     @Autowired
@@ -61,6 +65,9 @@ public class SurveyServiceImpl implements SurveyService {
 
     @Autowired
     private TitleService titleService;
+
+    @Autowired
+    private SubmitService submitService;
 
     @Override
     public Result getSurveyModelListByCreator(String creator){
@@ -86,18 +93,23 @@ public class SurveyServiceImpl implements SurveyService {
     public Result getSurveyModelListByCreatorAndType(String creator, String surveyType) {
         Result result = new Result();
 
-        if(Validator.isEmpty(creator)){
-            result.setMessage(Message.NotEmpty.getType());
-            return result;
+        try{
+            if(Validator.isEmpty(creator)){
+                result.setMessage(Message.NotEmpty.getType());
+                return result;
+            }
+
+            List<SurveyModel> surveyModelList = surveyDao.querySurveyListByCreatorAndType(creator, surveyType);
+            if(!Validator.isEmpty(surveyModelList)){
+                result.setData(surveyModelList);
+                result.setMessage(Message.Success.getType());
+            }else{
+                result.setMessage(Message.SelectNoAnyRecord.getType());
+            }
+        }catch (Exception e){
+            e.printStackTrace();
         }
 
-        List<SurveyModel> surveyModelList = surveyDao.querySurveyListByCreatorAndType(creator, surveyType);
-        if(!Validator.isEmpty(surveyModelList)){
-            result.setData(surveyModelList);
-            result.setMessage(Message.Success.getType());
-        }else{
-            result.setMessage(Message.SelectNoAnyRecord.getType());
-        }
 
         return result;
     }
@@ -189,12 +201,19 @@ public class SurveyServiceImpl implements SurveyService {
     @Transactional(propagation = Propagation.REQUIRED,rollbackFor = Exception.class)
     public Result submitSurveyTitleOptionModel(SurveyTitleOptionModel surveyTitleOptionModel){
         Result result = new Result();
-        if(Validator.isEmpty(surveyTitleOptionModel) || Validator.isEmpty(surveyTitleOptionModel.getTitleList())){
+        if(Validator.isEmpty(surveyTitleOptionModel) ){
             result.setData(null);
             result.setMessage(Message.NotEmpty.getType());
             return result;
         }
-        return submitSurveyAnswer(surveyTitleOptionModel,null,null, result);
+        List<TitleInfoModel> titleList = surveyTitleOptionModel.getTitleList();
+        if(Validator.isEmpty(titleList) ){
+            result.setData(null);
+            result.setMessage(Message.NotEmpty.getType());
+            return result;
+        }
+        //return submitSurveyAnswer(surveyTitleOptionModel,null,null, result);
+        return submitSurveyAnswer(titleList,surveyTitleOptionModel.getId(),"","",0,"","",result);
     }
 
 
@@ -204,7 +223,13 @@ public class SurveyServiceImpl implements SurveyService {
     public Result submitSurveyTitleOptionModel(SurveyTitleOptionModel surveyTitleOptionModel, String wxNickname, String wxOpenId) {
         Result result = new Result();
 
-        if(Validator.isEmpty(surveyTitleOptionModel) || Validator.isEmpty(surveyTitleOptionModel.getTitleList())){
+        if(Validator.isEmpty(surveyTitleOptionModel) ){
+            result.setData(null);
+            result.setMessage(Message.NotEmpty.getType());
+            return result;
+        }
+        List<TitleInfoModel> titleList = surveyTitleOptionModel.getTitleList();
+        if(Validator.isEmpty(titleList)){
             result.setData(null);
             result.setMessage(Message.NotEmpty.getType());
             return result;
@@ -230,7 +255,129 @@ public class SurveyServiceImpl implements SurveyService {
         }
         // 插入最新提交的答案
 
-        return submitSurveyAnswer(surveyTitleOptionModel,wxNickname,wxOpenId,result);
+        //return submitSurveyAnswer(surveyTitleOptionModel,wxNickname,wxOpenId,result);
+
+
+        return submitSurveyAnswer(titleList,surveyId,"","",0,wxNickname,wxOpenId,result);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED,rollbackFor = Exception.class)
+    public Result submitContestTitleList(List<TitleInfoModel> titleModelList, String surveyId,String submitter, String timeCount, String wxNickname, String wxOpenId) {
+        Result result = new Result();
+
+        result.setMessage(Message.Error.getType());
+        if(Validator.isEmpty(titleModelList)){
+            result.setMessage(Message.NotEmpty.getType());
+            return result;
+        }
+        if(Validator.isEmpty(surveyId)){
+            result.setMessage(Message.NotEmpty.getType());
+            return result;
+        }
+        if(Validator.isEmpty(timeCount)){
+            result.setMessage(Message.NotEmpty.getType());
+            return result;
+        }
+
+        if(Validator.isEmpty(wxNickname) || Validator.isEmpty(wxOpenId)){
+            result.setMessage(Message.NotEmpty.getType());
+            return result;
+        }
+
+        SurveyModel surveyModel = surveyDao.queryById(surveyId);
+        int titleAnswerNum = surveyModel.getAnswerTitleNum();
+        double scoreScale = surveyModel.getScoreScale();
+        double singleTitleScore = scoreScale/titleAnswerNum;
+        List<String> titleIdList = new ArrayList<>();
+        for(TitleInfoModel titleModel : titleModelList){
+            titleIdList.add(titleModel.getId());
+        }
+        List<TitleAnswerModel> titleAnswerModelList = titleDao.getTitleAnswerByIds(titleIdList);
+        double scoreGet = countScoreGet(titleModelList,titleAnswerModelList,singleTitleScore);
+        BigDecimal decimal = new BigDecimal(scoreGet);
+        decimal.setScale(2);
+        scoreGet = decimal.doubleValue();
+
+        return submitSurveyAnswer(titleModelList,surveyId,submitter,timeCount,scoreGet,wxNickname,wxOpenId,result);
+    }
+
+    private double countScoreGet(List<TitleInfoModel> titleModelList, List<TitleAnswerModel> titleAnswerModelList, double singleTitleScore) {
+        double scoreGet = 0.0;
+        Map<String,TitleAnswerModel> titleAnswerModelMap = new HashMap<>();
+        if(!Validator.isEmpty(titleAnswerModelList)){
+            for(TitleAnswerModel titleAnswerModel : titleAnswerModelList){
+                titleAnswerModelMap.put(titleAnswerModel.getId(),titleAnswerModel);
+            }
+        }
+        for(TitleInfoModel titleInfoModel : titleModelList){
+            String titleId = titleInfoModel.getId();
+            TitleAnswerModel titleAnswerModel = titleAnswerModelMap.get(titleId);
+            if(Validator.isEmpty(titleAnswerModel)){
+                continue;
+            }
+            List<AnswerModel> answerModelList = titleAnswerModel.getAnswerModelList();
+
+            if(titleInfoModel.singleType()){
+                List<OptionModel> optionModelList = titleInfoModel.getOptionModelList();
+                boolean isCorrected = true;
+                for(AnswerModel answerModel : answerModelList){
+                    for(OptionModel optionModel : optionModelList){
+                        if(optionModel.getId().equals(answerModel.getAnswer())){
+                            if(!optionModel.isSelected()){
+                                isCorrected = false;
+                                break;
+                            }
+                        }
+                    }
+                    if(!isCorrected){
+                        break;
+                    }
+                }
+                if(isCorrected){
+                    scoreGet += singleTitleScore;
+                }
+            }
+
+            if(titleInfoModel.multipleType()){
+                List<OptionModel> optionModelList = titleInfoModel.getOptionModelList();
+                boolean isCorrected = true;
+                Set<String> answerSet = new HashSet<>();
+                for(AnswerModel answerModel : answerModelList){
+                    answerSet.add(answerModel.getAnswer());
+                }
+                for(OptionModel optionModel : optionModelList){
+                    if(optionModel.isSelected()){
+                        if(!answerSet.contains(optionModel.getId())){
+                            isCorrected = false;
+                            break;
+                        }
+                    }else{
+                        if(answerSet.contains(optionModel.getId())){
+                            isCorrected = false;
+                            break;
+                        }
+                    }
+                }
+
+                if(isCorrected){
+                    scoreGet += singleTitleScore;
+                }
+            }
+
+            if(titleInfoModel.textType()){
+                String textInput = titleInfoModel.getText();
+                String textAnswer = titleAnswerModel.getAnswerModelList().get(0).getAnswer();
+                if(!Validator.isEmpty(textInput) && !Validator.isEmpty(textAnswer)){
+                    if(textInput.trim().indexOf(textAnswer.trim()) >= 0){
+                        scoreGet += singleTitleScore;
+                    }
+                }
+            }
+
+        }
+
+        return scoreGet;
     }
 
     @Override
@@ -262,6 +409,38 @@ public class SurveyServiceImpl implements SurveyService {
     }
 
     @Override
+    public Result getSurveySummaryNew(String surveyId) {
+
+        Result result = new Result();
+        result.setMessage(Message.Error.getType());
+        SurveyTitleOptionModel<TitleSummaryModel> surveyTitleOptionModel = null;
+        if(Validator.isEmpty(surveyId)){
+            result.setData(null);
+            result.setMessage(Message.NotEmpty.getType());
+            return result;
+        }
+
+        try {
+            surveyTitleOptionModel = surveyTitleOptionDao.getSurveyTitleOptionModel(surveyId, SurveyResultType.Summary.getType());
+            List<SurveySubmitSummaryModel> surveySubmitSummaryModelList = submitService.getSurveySubmitSummaryModelList(surveyId);
+            countSubmitPercent(surveyTitleOptionModel, surveySubmitSummaryModelList);
+            Collections.sort(surveyTitleOptionModel.getTitleList());
+            for (int i = 0; i < surveyTitleOptionModel.getTitleList().size(); i++) {
+                TitleSummaryModel titleSummaryModel = surveyTitleOptionModel.getTitleList().get(i);
+                Collections.sort(titleSummaryModel.getOptionModelList());
+            }
+            result.setData(surveyTitleOptionModel);
+            result.setMessage(Message.Success.getType());
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
+
+
+    @Override
     public Result getSurveySubmitDetailList(String surveyId){
         Result result = new Result();
         List<SurveyTitleOptionSubmitModel> surveyTitleOptionSubmitModelList = null;
@@ -278,6 +457,20 @@ public class SurveyServiceImpl implements SurveyService {
             result.setMessage(Message.Success.getType());
         }catch (Exception e){
             result.setMessage(e.getMessage());
+        }
+
+        return result;
+    }
+
+    @Override
+    public Result getSurveySubmitDetailListNew(String surveyId) {
+        Result result = new Result();
+        result.setMessage(Message.Error.getType());
+        SurveyTitleOptionModel<TitleSummaryModel> surveyTitleOptionModel = null;
+        if(Validator.isEmpty(surveyId)){
+            result.setData(null);
+            result.setMessage(Message.NotEmpty.getType());
+            return result;
         }
 
         return result;
@@ -301,6 +494,33 @@ public class SurveyServiceImpl implements SurveyService {
             result.setData(surveyTitleOptionStatisticsModel);
             result.setMessage(Message.Success.getType());
         }catch (Exception e){
+            e.printStackTrace();
+            result.setMessage(Message.Error.getType());
+        }
+
+        return result;
+    }
+
+    @Override
+    public Result getSurveyByNameStatisticsNew(String surveyId, String statisticsTitleId) {
+        Result result = new Result();
+
+        result.setMessage(Message.Error.getType());
+        if(Validator.isEmpty(surveyId) || Validator.isEmpty(statisticsTitleId)){
+            result.setMessage(Message.NotEmpty.getType());
+            return result;
+        }
+        SurveyTitleOptionModel<TitleStatisticsModel> surveyTitleOptionModel = null;
+        List<SurveySubmitSummaryModel> surveySubmitList = null;
+        try{
+            surveyTitleOptionModel = surveyTitleOptionDao.getSurveyTitleOptionModel(surveyId,SurveyResultType.Statistics.getType());
+            surveySubmitList = submitService.getSurveySubmitSummaryModelList(surveyId);
+            //this.titleSort(surveyTitleOptionSubmitModelList);
+            resultStatistics(surveyTitleOptionModel, surveySubmitList,statisticsTitleId);
+            result.setData(surveyTitleOptionModel);
+            result.setMessage(Message.Success.getType());
+        }catch (Exception e){
+            e.printStackTrace();
             result.setMessage(Message.Error.getType());
         }
 
@@ -324,6 +544,7 @@ public class SurveyServiceImpl implements SurveyService {
             }
 
             surveyModel.setId(UUID.randomUUID().toString());
+            surveyModel.setCreateTime(DateFormatUtil.format(new Date(),""));
             int rows = surveyDao.saveSurvey(surveyModel);
             if(rows <= 0){
                 result.setMessage(Message.AddError.getType());
@@ -333,7 +554,9 @@ public class SurveyServiceImpl implements SurveyService {
             }
 
         }catch (Exception e){
+            e.printStackTrace();
             result.setMessage(Message.Error.getType());
+            throw e;
         }
 
         return result;
@@ -401,6 +624,13 @@ public class SurveyServiceImpl implements SurveyService {
             }
             // 删除optionModel
             rows = optionDao.deleteOptionByTitleIds(titleModelList);
+            if(rows < 0){
+                result.setMessage(Message.DeleteError.getType());
+                return result;
+            }
+
+            // 删除AnswerModel
+            rows = answerDao.deleteAnswerByTitleIds(titleModelList);
             if(rows < 0){
                 result.setMessage(Message.DeleteError.getType());
                 return result;
@@ -562,8 +792,6 @@ public class SurveyServiceImpl implements SurveyService {
 
         result = titleService.saveTitleAndAnswerModelList(titleModelList,answerModelList);
 
-        System.out.println(result.getMessage());
-
         return result;
     }
 
@@ -678,13 +906,16 @@ public class SurveyServiceImpl implements SurveyService {
         if (cell == null) {
             return "";
         }
+        /*
         if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
             return String.valueOf(cell.getNumericCellValue());
         } else if (cell.getCellType() == Cell.CELL_TYPE_BOOLEAN) {
             return String.valueOf(cell.getBooleanCellValue());
         } else {
             return cell.getStringCellValue();
-        }
+        }*/
+        cell.setCellType(Cell.CELL_TYPE_STRING);
+        return cell.getStringCellValue();
     }
 
     private Map<String, SubmitTitleModel> convertSubmitTitleListToMap(List<SubmitTitleModel> submitTitleModelList, Map<String, SubmitTitleModel> submitTitleModelMap){
@@ -782,6 +1013,90 @@ public class SurveyServiceImpl implements SurveyService {
         }
     }
 
+    private void resultStatistics(SurveyTitleOptionModel<TitleStatisticsModel> surveyTitleOptionModel, List<SurveySubmitSummaryModel> surveySubmitList,String statisticsTitleId){
+        if(Validator.isEmpty(surveyTitleOptionModel) ){
+            return;
+        }
+        if(Validator.isEmpty(surveySubmitList)){
+            return;
+        }
+        if(Validator.isEmpty(statisticsTitleId)){
+            return;
+        }
+        List<TitleStatisticsModel> titleList = surveyTitleOptionModel.getTitleList();
+        if(Validator.isEmpty(titleList)){
+            return;
+        }
+        surveyTitleOptionModel.setSubmitCount(surveySubmitList.size());
+        for(SurveySubmitSummaryModel submitSummaryModel : surveySubmitList){
+            List<SubmitTitleAnswerModel> submitTitleList = submitSummaryModel.getSubmitTitleAnswerModelList();
+            if(Validator.isEmpty(submitTitleList)){
+                continue;
+            }
+            // 先找出每一份答卷的姓名
+            String name = "";
+            String titleId = "";
+            for(SubmitTitleAnswerModel submitTitleAnswerModel : submitTitleList){
+                titleId = submitTitleAnswerModel.getTitleId();
+                if(titleId.equals(statisticsTitleId)){
+                    name = submitTitleAnswerModel.getAnswer();
+                }
+            }
+            if(Validator.isEmpty(name)){
+                continue;
+            }
+            // 再为每一题的答案填充姓名
+            for(SubmitTitleAnswerModel submitTitleAnswerModel : submitTitleList){
+                titleId = submitTitleAnswerModel.getTitleId();
+                for(TitleStatisticsModel titleStatisticsModel : titleList){
+                    if(!titleStatisticsModel.getId().equals(titleId)){
+                        continue;
+                    }
+                    String answer = submitTitleAnswerModel.getAnswer();
+                    if(Validator.isEmpty(answer)){
+                        continue;
+                    }
+                    if(titleStatisticsModel.singleType() || titleStatisticsModel.multipleType()){
+                        List<OptionStatisticsModel> optionModelList = titleStatisticsModel.getOptionModelList();
+                        if(!Validator.isEmpty(optionModelList)){
+                            for(OptionStatisticsModel optionModel : optionModelList){
+                                if(optionModel.getId().equals(answer)){
+                                    if(Validator.isEmpty(optionModel.getNameList())){
+                                        List<String> nameList = new ArrayList<>();
+                                        nameList.add(name);
+                                        optionModel.setNameList(nameList);
+                                    }else{
+                                        optionModel.getNameList().add(name);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if(titleStatisticsModel.textType() || titleStatisticsModel.imageType()){
+                        List<TextNameModel> textNameList =  titleStatisticsModel.getTextNameList();
+                        if(Validator.isEmpty(textNameList)){
+                            textNameList = new ArrayList<>();
+                            titleStatisticsModel.setTextNameList(textNameList);
+                        }
+                        TextNameModel textNameModel = null;
+                        if(titleId.equals(statisticsTitleId)){
+                            textNameModel = new TextNameModel();
+                            textNameModel.setName(name);
+                            textNameList.add(textNameModel);
+                        }else {
+                            textNameModel = new TextNameModel(answer,name);
+                            textNameList.add(textNameModel);
+                        }
+                    }
+                }
+            }
+        }
+
+        // 对名字排序
+        nameSort(titleList);
+    }
+
     private void statistics(SurveyTitleOptionStatisticsModel surveyTitleOptionModel,List<SurveyTitleOptionSubmitModel> surveyTitleOptionSubmitModelList,String statisticsTitleId){
 
         if(Validator.isEmpty(surveyTitleOptionModel) || Validator.isEmpty(surveyTitleOptionSubmitModelList) || Validator.isEmpty(statisticsTitleId)){
@@ -861,10 +1176,11 @@ public class SurveyServiceImpl implements SurveyService {
         }
 
         //  对名字进行排序
-        for(TitleStatisticsModel titleStatisticsModel : surveyTitleOptionModel.getTitleList()){
-            String titleId = titleStatisticsModel.getId();
-            String titleType = titleStatisticsModel.getTitleType();
+        nameSort(surveyTitleOptionModel.getTitleList());
+    }
 
+    private void nameSort(List<TitleStatisticsModel> titleList){
+        for(TitleStatisticsModel titleStatisticsModel : titleList){
             if(titleStatisticsModel.textType() || titleStatisticsModel.imageType()) {
                 List<TextNameModel> textNameList = titleStatisticsModel.getTextNameList();
                 if (textNameList != null) {
@@ -885,8 +1201,8 @@ public class SurveyServiceImpl implements SurveyService {
                 }
             }
         }
-
     }
+
 
     private Map<String,Map<String,Object>> convertSurveySubmitListToMap(List<SurveyTitleOptionSubmitModel> surveyTitleOptionSubmitModelList){
         Map<String,Map<String,Object>> submitSurveysMap = new HashMap<>();
@@ -927,6 +1243,58 @@ public class SurveyServiceImpl implements SurveyService {
                 List<TitleInfoModel> titleInfoModelList = surveyTitleOptionSubmitModelList.get(i).getTitleList();
                 if(!Validator.isEmpty(titleInfoModelList)){
                     Collections.sort(titleInfoModelList);
+                }
+            }
+        }
+    }
+
+    private void countSubmitPercent(SurveyTitleOptionModel<TitleSummaryModel> surveyTitleOptionModel,List<SurveySubmitSummaryModel> submitList ){
+        if(Validator.isEmpty(surveyTitleOptionModel)){
+            return;
+        }
+        if(Validator.isEmpty(surveyTitleOptionModel.getTitleList())){
+            return;
+        }
+        if(Validator.isEmpty(submitList)){
+            return;
+        }
+        surveyTitleOptionModel.setSubmitCount(submitList.size());
+        List<TitleSummaryModel> titleSummaryModelList = surveyTitleOptionModel.getTitleList();
+        for(SurveySubmitSummaryModel surveySubmitSummaryModel : submitList){
+            List<SubmitTitleAnswerModel> submitTitleAnswerList = surveySubmitSummaryModel.getSubmitTitleAnswerModelList();
+            if(Validator.isEmpty(submitTitleAnswerList)){
+                continue;
+            }
+            for(SubmitTitleAnswerModel submitTitleAnswerModel : submitTitleAnswerList){
+                String titleId = submitTitleAnswerModel.getTitleId();
+                for(TitleSummaryModel titleSummaryModel : titleSummaryModelList){
+                    if(!titleSummaryModel.getId().equals(titleId)){
+                        continue;
+                    }
+                    if(titleSummaryModel.singleType() || titleSummaryModel.multipleType()){
+                        for(OptionSummaryModel optionSummaryModel : titleSummaryModel.getOptionModelList()){
+                            if(optionSummaryModel.getId().equals(submitTitleAnswerModel.getAnswer())){
+                                int submitCount = optionSummaryModel.getSubmitCount();
+                                submitCount += 1;
+                                optionSummaryModel.setSubmitCount(submitCount);
+                            }
+                        }
+                    }else{
+                        if(Validator.isEmpty(titleSummaryModel.getSubmitTitleAnswerModelList())){
+                            titleSummaryModel.setSubmitTitleAnswerModelList(new ArrayList<>());
+                        }
+                        titleSummaryModel.getSubmitTitleAnswerModelList().add(submitTitleAnswerModel);
+                    }
+                }
+            }
+        }
+
+        DecimalFormat decimalFormat = new DecimalFormat("#.##%");
+        for(TitleSummaryModel titleSummaryModel : titleSummaryModelList){
+            if(titleSummaryModel.singleType() || titleSummaryModel.multipleType()){
+                for (OptionSummaryModel optionSummaryModel : titleSummaryModel.getOptionModelList()){
+                    String percent = decimalFormat.format(((float)optionSummaryModel.getSubmitCount())/submitList.size());
+                    optionSummaryModel.setPercent(percent);
                 }
             }
         }
@@ -1051,15 +1419,18 @@ public class SurveyServiceImpl implements SurveyService {
     }
 
 
-    private Result submitSurveyAnswer(SurveyTitleOptionModel surveyTitleOptionModel,String wxNickname,String wxOpenId,Result result) {
-        List<TitleInfoModel> titleModelList = surveyTitleOptionModel.getTitleList();
+    private Result submitSurveyAnswer(List<TitleInfoModel> titleModelList,String surveyId,String submitter, String timeCount, double scoreGet, String wxNickname,String wxOpenId,Result result) {
+
         List<SubmitOptionModel> submitSingleModelList = new ArrayList<>();
         List<SubmitOptionModel> submitMultipleModelList = new ArrayList<>();
         List<SubmitTextTitleModel> submitTextTitleModelList = new ArrayList<>();
         List<SubmitFileTitleModel> submitFileTitleModelList = new ArrayList<>();
 
         SurveySubmitModel surveySubmitModel = null;
-        surveySubmitModel = new SurveySubmitModel(UUID.randomUUID().toString(),surveyTitleOptionModel.getId(),"",Validator.isEmpty(wxNickname)?"":wxNickname, Validator.isEmpty(wxOpenId)?"":wxOpenId);
+        //surveySubmitModel = new SurveySubmitModel(UUID.randomUUID().toString(),surveyId,"","",Validator.isEmpty(wxNickname)?"":wxNickname, Validator.isEmpty(wxOpenId)?"":wxOpenId);
+
+        surveySubmitModel = new SurveySubmitModel(UUID.randomUUID().toString(),surveyId,submitter,timeCount,scoreGet,wxNickname, wxOpenId);
+        surveySubmitModel.setCreateTime(DateFormatUtil.format(new Date(),""));
         TitleInfoModel titleInfoModel = null;
         for(int i = 0; i < titleModelList.size(); i++){
             titleInfoModel = titleModelList.get(i);
@@ -1095,7 +1466,6 @@ public class SurveyServiceImpl implements SurveyService {
             }
         }
 
-
         surveySubmitDao.insertSurveySubmit(surveySubmitModel);
         if(!Validator.isEmpty(submitSingleModelList)){
             submitSingleTitleDao.insertSubmitSingleTitleList(submitSingleModelList);
@@ -1113,8 +1483,9 @@ public class SurveyServiceImpl implements SurveyService {
             submitFileTitleDao.insertSubmitFileTitleList(submitFileTitleModelList);
         }
 
-        result.setData(surveyTitleOptionModel);
+        //result.setData(titleModelList);
         result.setMessage(Message.Success.getType());
+        result.setData(surveySubmitModel);
         return result;
     }
 

@@ -9,30 +9,30 @@ import java.util.List;
  */
 public interface SurveyDao {
 
-    public int saveSurvey(SurveyModel surveyModel);
+    int saveSurvey(SurveyModel surveyModel);
 
-    public int updateSurvey(SurveyModel surveyModel);
+    int updateSurvey(SurveyModel surveyModel);
 
-    public int updateSurveyTimeSetting(SurveyModel surveyModel);
+    int updateSurveyTimeSetting(SurveyModel surveyModel);
 
-    public int deleteSurvey(String surveyId);
+    int deleteSurvey(String surveyId);
 
-    public SurveyModel queryById(String id);
+    SurveyModel queryById(String id);
 
-    public List<SurveyModel> queryByName(String surveyName);
+    List<SurveyModel> queryByName(String surveyName);
 
-    public List<SurveyModel> queryByNameAndType(@Param("surveyName") String surveyName, @Param("surveyType") String surveyType);
+    List<SurveyModel> queryByNameAndType(@Param("surveyName") String surveyName, @Param("surveyType") String surveyType);
 
-    public List<SurveyModel> queryBySurveyNameAndCreator(@Param("surveyName") String surveyName, @Param("creator") String creator);
+    List<SurveyModel> queryBySurveyNameAndCreator(@Param("surveyName") String surveyName, @Param("creator") String creator);
 
-    public List<SurveyModel> queryBySurveyNameAndTypeAndCreator(@Param("surveyName") String surveyName, @Param("creator") String creator, @Param("surveyType") String surveyType);
+    List<SurveyModel> queryBySurveyNameAndTypeAndCreator(@Param("surveyName") String surveyName, @Param("creator") String creator, @Param("surveyType") String surveyType);
 
-    public List<SurveyModel> queryAll();
+    List<SurveyModel> queryAll();
 
-    public List<SurveyModel> querySurveyListByCreator(String creator);
+    List<SurveyModel> querySurveyListByCreator(String creator);
 
-    public List<SurveyModel> querySurveyListByCreatorAndType(@Param("creator") String creator, @Param("surveyType") String surveyType);
+    List<SurveyModel> querySurveyListByCreatorAndType(@Param("creator") String creator, @Param("surveyType") String surveyType);
 
-    public int getSubmitsCountById(String surveyId);
+    int getSubmitsCountById(String surveyId);
 
 }

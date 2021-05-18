@@ -51,6 +51,15 @@ public class TitleCtrl {
     }
 
     @ResponseBody
+    @RequestMapping(value = "/contest/get", method = RequestMethod.GET, produces = "text/plain;charset=utf-8")
+    public String getContestTitle(String surveyId, int answerTitleNum){
+        Result result = titleService.getContestTitle(surveyId,answerTitleNum);
+        String resultStr = JSON.toJSONString(result);
+
+        return resultStr;
+    }
+
+    @ResponseBody
     @RequestMapping(value = "/get/page", method = RequestMethod.GET, produces = "text/plain;charset=utf-8")
     public String getTitlePage(String surveyId, String surveyType, int pageSize, int start){
         String resultStr = "";

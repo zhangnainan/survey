@@ -3,13 +3,13 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sg.survey.submit.SurveySubmitDao">
     <insert id="insertSurveySubmit" parameterType="SurveySubmitModel">
-        insert into survey_submits(id,survey_id,submitter,wx_nickname,wx_openid) values(#{id},#{surveyId},#{submitter},#{wxNickname},#{wxOpenId})
+        insert into survey_submits(id,survey_id,submitter,time_count,score_get,wx_nickname,wx_openid,create_time) values(#{id},#{surveyId},#{submitter},#{timeCount},${scoreGet},#{wxNickname},#{wxOpenId},#{createTime})
     </insert>
 
     <insert id="insertSurveySubmitList" parameterType="java.util.List">
-        insert into survey_submits(id,survey_id,submitter,wx_nickname,wx_openid) values
+        insert into survey_submits(id,survey_id,submitter,time_count,score_get,wx_nickname,wx_openid,create_time) values
         <foreach collection="list" index="index" item="item" separator="," open="" close="" >
-            (#{item.id},#{item.surveyId},#{item.submitter},#{item.wxNickname},#{item.wxOpenId})
+            (#{item.id},#{item.surveyId},#{item.submitter},#{item.timeCount},${item.scoreGet},#{item.wxNickname},#{item.wxOpenId},#{item.createTime})
         </foreach>
     </insert>
 
@@ -17,11 +17,86 @@
         <id column="id" property="id" />
         <result column="survey_id" property="surveyId" />
         <result column="submitter" property="submitter" />
+        <result column="time_count" property="timeCount" />
+        <result column="score_get" property="scoreGet" />
         <result column="wx_nickname" property="wxNickname" />
         <result column="wx_openid" property="wxOpenId" />
+        <result column="create_time" property="createTime" />
     </resultMap>
     <select id="getSurveySubmitsById" parameterType="java.lang.String" resultMap="SurveySubmitModelMap">
-        select * from survey_submits where survey_id=#{surveyId}
+        select * from survey_submits where survey_id=#{surveyId} order by create_time
+    </select>
+
+    <resultMap id="SurveySubmitSummaryMap" type="SurveySubmitSummaryModel" autoMapping="true">
+        <id column="submitId" property="id" />
+        <result column="survey_id" property="surveyId" />
+        <result column="submitter" property="submitter" />
+        <result column="time_count" property="timeCount"/>
+        <result column="score_get" property="scoreGet"/>
+        <result column="wx_nickname" property="wxNickname"/>
+        <result column="wx_openid" property="wxOpenId"/>
+        <result column="create_time" property="createTime"/>
+        <!--
+        <collection property="submitTitleAnswerModelList" column="submitId" select="getSubmitTitleAnswerList" ofType="SubmitTitleAnswerModel">
+            <id column="answerId" property="id" />
+            <result column="answerTitleId" property="titleId" />
+            <result column="answerSubmitId" property="submitId" />
+            <result column="answer" property="answer" />
+        </collection>
+        -->
+    </resultMap>
+
+    <select id="getSurveySubmitSummaryList" resultMap="SurveySubmitSummaryMap">
+        select *, id as submitId from survey_submits where survey_id=#{surveyId} order by create_time
+    </select>
+
+
+    <resultMap id="SubmitTitleAnswerMap" type="SubmitTitleAnswerModel" autoMapping="true">
+        <id column="answerId" property="id" />
+        <result column="answerTitleId" property="titleId" />
+        <result column="answerSubmitId" property="submitId" />
+        <result column="answer" property="answer" />
+    </resultMap>
+
+
+    <select id="getSubmitTitleAnswerListBySubmitIds" parameterType="java.util.List" resultMap="SubmitTitleAnswerMap">
+        select id as answerId,title_id as answerTitleId,submit_id as answerSubmitId,option_id as answer from submits_single where submit_id in
+        <foreach collection="list" item="item" open="(" close=")" separator=",">
+            #{item.id}
+        </foreach>
+        union all
+        select id as answerId,title_id as answerTitleId,submit_id as answerSubmitId,option_id as answer from submits_multiple where submit_id in
+        <foreach collection="list" item="item" open="(" close=")" separator=",">
+            #{item.id}
+        </foreach>
+        union all
+        select id as answerId,title_id as answerTitleId,submit_id as answerSubmitId,text as answer from submits_text where submit_id in
+        <foreach collection="list" item="item" open="(" close=")" separator=",">
+            #{item.id}
+        </foreach>
+        union all
+        select id as answerId,title_id as answerTitleId,submit_id as answerSubmitId,file_name as answer from submits_file where submit_id in
+        <foreach collection="list" item="item" open="(" close=")" separator=",">
+            #{item.id}
+        </foreach>
+    </select>
+
+    <select id="getSubmitTitleAnswerList" parameterType="java.lang.String" resultMap="SubmitTitleAnswerMap">
+        select id as answerId,title_id as answerTitleId,submit_id as answerSubmitId,option_id as answer from submits_single where submit_id=#{submitId}
+        union all
+        select id as answerId,title_id as answerTitleId,submit_id as answerSubmitId,option_id as answer from submits_multiple where submit_id=#{submitId}
+        union all
+        select id as answerId,title_id as answerTitleId,submit_id as answerSubmitId,text as answer from submits_text where submit_id=#{submitId}
+        union all
+        select id as answerId,title_id as answerTitleId,submit_id as answerSubmitId,file_name as answer from submits_file where submit_id=#{submitId}
+    </select>
+
+    <select id="getContestRankPage" resultMap="SurveySubmitModelMap">
+        select * from survey_submits where survey_id=#{surveyId} order by score_get desc ,time_count asc limit ${start},${pageSize}
+    </select>
+
+    <select id="getSubmitCount" resultType="java.lang.Integer">
+        select count(1) from survey_submits where survey_id=#{surveyId}
     </select>
 
     <select id="getSurveySubmitsByIdAndWxNickname" parameterType="java.lang.String" resultMap="SurveySubmitModelMap">

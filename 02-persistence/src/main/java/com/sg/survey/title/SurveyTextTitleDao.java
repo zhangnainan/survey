@@ -7,16 +7,16 @@ import java.util.List;
  */
 public interface SurveyTextTitleDao {
 
-    public int insertSurveyTextTitle(SurveyTextTitleModel surveyTextTitleModel);
+    int insertSurveyTextTitle(SurveyTextTitleModel surveyTextTitleModel);
 
-    public int insertSurveyTextTitleList(List<SurveyTextTitleModel> surveyTextTitleModelList);
+    int insertSurveyTextTitleList(List<SurveyTextTitleModel> surveyTextTitleModelList);
 
-    public int deleteSurveyTextTitleById(String id);
+    int deleteSurveyTextTitleById(String id);
 
-    public int deleteSurveyTextTitleBySurveyId(String surveyId);
+    int deleteSurveyTextTitleBySurveyId(String surveyId);
 
-    public int updateSurveyTextTitleModel(SurveyTextTitleModel surveyTextTitleModel);
+    int updateSurveyTextTitleModel(SurveyTextTitleModel surveyTextTitleModel);
 
-    public List<SurveyTextTitleModel> querySurveyTextTitleBySurveyId(String surveyId);
+    List<SurveyTextTitleModel> querySurveyTextTitleBySurveyId(String surveyId);
 
 }

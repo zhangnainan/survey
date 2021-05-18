@@ -1,6 +1,7 @@
 com\sg\survey\Result.class
 com\sg\survey\Message.class
-com\sg\survey\os\OSType.class
 com\sg\survey\util\UploadUtil.class
-com\sg\survey\os\OSInfo.class
 com\sg\survey\Validator.class
+com\sg\survey\util\DateFormatUtil.class
+com\sg\survey\os\OSType.class
+com\sg\survey\os\OSInfo.class

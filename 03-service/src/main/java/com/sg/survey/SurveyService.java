@@ -1,6 +1,8 @@
 package com.sg.survey;
 
+import com.sg.survey.title.TitleInfoModel;
 import com.sg.survey.title.TitleModel;
+import com.sg.survey.title.option.OptionModel;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -16,7 +18,7 @@ public interface SurveyService {
      *
      * @return
      */
-    public Result getSurveyModelListByCreator(String creator);
+    Result getSurveyModelListByCreator(String creator);
 
     /**
      * 获取问卷或知识竞赛列表
@@ -25,7 +27,7 @@ public interface SurveyService {
      * @param surveyType
      * @return
      */
-    public Result getSurveyModelListByCreatorAndType(String creator, String surveyType);
+    Result getSurveyModelListByCreatorAndType(String creator, String surveyType);
 
     /**
      * 单纯获取调查问卷信息
@@ -33,7 +35,7 @@ public interface SurveyService {
      * @param surveyId
      * @return
      */
-    public Result getSurveyInfo(String surveyId);
+    Result getSurveyInfo(String surveyId);
 
     /**
      * 获取问卷详细信息
@@ -41,7 +43,7 @@ public interface SurveyService {
      * @param surveyId
      * @return
      */
-    public Result getSurveyTitleOptionModel(String surveyId);
+    Result getSurveyTitleOptionModel(String surveyId);
 
     /**
      *
@@ -50,7 +52,7 @@ public interface SurveyService {
      * @param wxOpenId
      * @return
      */
-    public Result getSurveyTitleOptionModel(String surveyId, String wxNickname, String wxOpenId);
+    Result getSurveyTitleOptionModel(String surveyId, String wxNickname, String wxOpenId);
 
 
     /**
@@ -59,7 +61,7 @@ public interface SurveyService {
      * @param surveyTitleOptionModel
      * @return
      */
-    public Result submitSurveyTitleOptionModel(SurveyTitleOptionModel surveyTitleOptionModel);
+    Result submitSurveyTitleOptionModel(SurveyTitleOptionModel surveyTitleOptionModel);
 
     /**
      * 提交问卷调查填写结果（如果该微信昵称上次有提交过，则进行更新操作）
@@ -69,7 +71,20 @@ public interface SurveyService {
      * @param wxOpenId
      * @return
      */
-    public Result submitSurveyTitleOptionModel(SurveyTitleOptionModel surveyTitleOptionModel, String wxNickname, String wxOpenId);
+    Result submitSurveyTitleOptionModel(SurveyTitleOptionModel surveyTitleOptionModel, String wxNickname, String wxOpenId);
+
+    /**
+     * 提交竞赛答卷结果
+     *
+     * @param titleModelList
+     * @param surveyId
+     * @param timeCount
+     * @param wxNickname
+     * @param wxOpenId
+     * @return
+     */
+    Result submitContestTitleList(List<TitleInfoModel> titleModelList, String surveyId, String submitter, String timeCount, String wxNickname, String wxOpenId);
+
 
     /**
      * 获取问卷结果汇总
@@ -77,8 +92,15 @@ public interface SurveyService {
      * @param surveyId
      * @return
      */
-    public Result getSurveySummary(String surveyId);
+    Result getSurveySummary(String surveyId);
 
+    /**
+     * 获取问卷结果汇总(新版)
+     *
+     * @param surveyId
+     * @return
+     */
+    Result getSurveySummaryNew(String surveyId);
 
     /**
      * 获取答卷详情
@@ -86,8 +108,15 @@ public interface SurveyService {
      * @param surveyId
      * @return
      */
-    public Result getSurveySubmitDetailList(String surveyId);
+    Result getSurveySubmitDetailList(String surveyId);
 
+    /**
+     * 获取答卷详情(新版)
+     *
+     * @param surveyId
+     * @return
+     */
+    Result getSurveySubmitDetailListNew(String surveyId);
 
     /**
      * 问卷按姓名进行统计
@@ -96,8 +125,16 @@ public interface SurveyService {
      * @param titleId
      * @return
      */
-    public Result getSurveyByNameStatistics(String surveyId, String titleId);
+    Result getSurveyByNameStatistics(String surveyId, String titleId);
 
+    /**
+     * 问卷按姓名进行统计(新版)
+     *
+     * @param surveyId
+     * @param titleId
+     * @return
+     */
+    Result getSurveyByNameStatisticsNew(String surveyId, String titleId);
 
     /**
      * 问卷创建
@@ -105,7 +142,7 @@ public interface SurveyService {
      * @param surveyModel
      * @return
      */
-    public Result saveSurvey(SurveyModel surveyModel);
+    Result saveSurvey(SurveyModel surveyModel);
 
     /**
      * 更新surveyModel
@@ -113,7 +150,7 @@ public interface SurveyService {
      * @param surveyModel
      * @return
      */
-    public Result updateSurvey(SurveyModel surveyModel);
+    Result updateSurvey(SurveyModel surveyModel);
 
     /**
      * 删除Survey
@@ -121,7 +158,7 @@ public interface SurveyService {
      * @param surveyId
      * @return
      */
-    public Result deleteSurvey(String surveyId);
+    Result deleteSurvey(String surveyId);
 
     /**
      * 更新survey的时间设置
@@ -129,7 +166,7 @@ public interface SurveyService {
      * @param surveyModel
      * @return
      */
-    public Result updateSurveyTimeSetting(SurveyModel surveyModel);
+    Result updateSurveyTimeSetting(SurveyModel surveyModel);
 
     /**
      * 清空survey数据
@@ -137,7 +174,7 @@ public interface SurveyService {
      * @param surveyId
      * @return
      */
-    public Result clearSurvey(String surveyId);
+    Result clearSurvey(String surveyId);
 
     /**
      * 创建Excel工作表
@@ -147,7 +184,7 @@ public interface SurveyService {
      * @param titleModelList
      * @return
      */
-    public XSSFWorkbook createWorkbook(String surveyId, int sortCols, List<TitleModel> titleModelList);
+    XSSFWorkbook createWorkbook(String surveyId, int sortCols, List<TitleModel> titleModelList);
 
 
     /**
@@ -156,5 +193,5 @@ public interface SurveyService {
      * @param file
      * @return
      */
-    public Result contestTitleImport(MultipartFile file, String surveyId);
+    Result contestTitleImport(MultipartFile file, String surveyId);
 }

@@ -1,4 +1,5 @@
 com\sg\survey\user\UserCtrl.class
+com\sg\survey\SurveyCtrl.class
+com\sg\survey\submit\SubmitCtrl.class
 com\sg\survey\title\option\OptionCtrl.class
 com\sg\survey\title\TitleCtrl.class
-com\sg\survey\SurveyCtrl.class

@@ -9,16 +9,16 @@ import java.util.List;
  */
 public interface SubmitMultipleTitleDao {
 
-    public int insertSubmitMultipleTitle(SubmitMultipleTitleModel submitMultipleTitleModel);
+    int insertSubmitMultipleTitle(SubmitMultipleTitleModel submitMultipleTitleModel);
 
-    public int insertSubmitMultipleTitleList(List<SubmitOptionModel> submitOptionModelList);
+    int insertSubmitMultipleTitleList(List<SubmitOptionModel> submitOptionModelList);
 
     //public int deleteSubmitBySubmitId(String submitId);
-    public int deleteSubmitMultipleTitleBySubmitId(String submitId);
+    int deleteSubmitMultipleTitleBySubmitId(String submitId);
 
-    public int deleteSubmitMultipleByTitleId(List<TitleModel> titleModelList);
+    int deleteSubmitMultipleByTitleId(List<TitleModel> titleModelList);
 
-    public List<SubmitMultipleTitleModel> querySubmitMultipleTitleListBySubmitId(String submitId);
+    List<SubmitMultipleTitleModel> querySubmitMultipleTitleListBySubmitId(String submitId);
 
-    public List<SubmitMultipleTitleModel> querySubmitMultipleTitleModelGroupByTitleId(String submitId);
+    List<SubmitMultipleTitleModel> querySubmitMultipleTitleModelGroupByTitleId(String submitId);
 }

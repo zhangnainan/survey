@@ -12,31 +12,36 @@ import java.util.Optional;
  */
 public interface TitleDao {
 
-    public List<TitleModel> getTitleModelList(@Param("surveyId") String surveyId,@Param("titleType") String titleType);
+    List<TitleModel> getTitleModelList(@Param("surveyId") String surveyId,@Param("titleType") String titleType);
 
-    public int getTitleCount(String surveyId);
+    int getTitleCount(String surveyId);
 
-    public List<TitleModel> getAllTitleModelList(String surveyId);
+    List<TitleModel> getAllTitleModelList(String surveyId);
 
-    public List<TitleModel<OptionModel>> getTitlePage(@Param("surveyId") String surveyId,@Param("pageSize") int pageSize,@Param("start") int start);
+    List<TitleModel<OptionModel>> getContestTitle(@Param("surveyId") String surveyId,@Param("answerTitleNum") int answerTitleNum);
 
-    public List<TitleAnswerModel> getTitleAnswerPage(@Param("surveyId") String surveyId,@Param("pageSize") int pageSize,@Param("start") int start);
+    List<TitleModel<OptionModel>> getTitlePage(@Param("surveyId") String surveyId,@Param("pageSize") int pageSize,@Param("start") int start);
 
-    public List<TitleModel> queryTitleModel(@Param("surveyId") String surveyId, @Param("titleName") String titleName);
+    List<TitleAnswerModel> getTitleAnswerPage(@Param("surveyId") String surveyId,@Param("pageSize") int pageSize,@Param("start") int start);
 
-    public List<TitleModel> queryNameColumnBySurveyId(String surveyId);
+    List<TitleAnswerModel> getTitleAnswerByIds(List<String> titleIdList);
 
-    public List<SubmitTitleModel> querySubmitTitleList(@Param("titleId") String titleId,@Param("titleType") String titleType);
+    List<TitleModel> queryTitleModel(@Param("surveyId") String surveyId, @Param("titleName") String titleName);
 
-    public int saveTitleModel(TitleModel titleModel);
+    List<TitleModel> queryNameColumnBySurveyId(String surveyId);
 
-    public int saveTitleModelList(List<TitleModel<OptionModel>> titleModelList);
+    List<SubmitTitleModel> querySubmitTitleList(@Param("titleId") String titleId,@Param("titleType") String titleType);
 
-    public int updateTitleModel(TitleModel titleModel);
+    int saveTitleModel(TitleModel titleModel);
 
-    public int deleteTitleModel(String titleId);
+    int saveTitleModelList(List<TitleModel<OptionModel>> titleModelList);
 
-    public int deleteTitleModelList(List<TitleModel> titleModelList);
+    int updateTitleModel(TitleModel titleModel);
 
-    public int updateTitleModelSequence(List<TitleModel> titleModelList);
+    int deleteTitleModel(String titleId);
+
+    int deleteTitleModelList(List<TitleModel> titleModelList);
+
+    int updateTitleModelSequence(List<TitleModel> titleModelList);
+
 }

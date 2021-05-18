@@ -4,7 +4,9 @@ com\sg\survey\user\UserServiceImpl.class
 com\sg\survey\title\TitleServiceImpl.class
 com\sg\survey\title\option\OptionService.class
 com\sg\survey\SurveyServiceImpl.class
-com\sg\survey\user\UserService.class
+com\sg\survey\submit\SubmitServiceImpl.class
 com\sg\survey\SurveyServiceImpl$MultiColComparator.class
 com\sg\survey\title\answer\AnswerService.class
 com\sg\survey\title\option\OptionServiceImpl.class
+com\sg\survey\submit\SubmitService.class
+com\sg\survey\user\UserService.class

@@ -4,11 +4,11 @@
 <mapper namespace="com.sg.survey.SurveyDao">
 
     <insert id="saveSurvey" parameterType="SurveyModel">
-        insert into survey(id,survey_name,survey_state,survey_type,creator,answer_title_num,notes) values(#{id},#{surveyName},#{surveyState},#{surveyType},#{creator},#{answerTitleNum},#{notes})
+        insert into survey(id,survey_name,survey_state,survey_type,creator,answer_title_num,score_scale,notes,create_time) values(#{id},#{surveyName},#{surveyState},#{surveyType},#{creator},#{answerTitleNum},#{scoreScale},#{notes},#{createTime})
     </insert>
 
     <update id="updateSurvey" parameterType="SurveyModel">
-        update survey set survey_name=#{surveyName},survey_state=#{surveyState},survey_type=#{surveyType},creator=#{creator},answer_title_num=#{answerTitleNum},notes=#{notes} where id=#{id}
+        update survey set survey_name=#{surveyName},survey_state=#{surveyState},survey_type=#{surveyType},creator=#{creator},answer_title_num=#{answerTitleNum},score_scale=#{scoreScale},notes=#{notes} where id=#{id}
     </update>
 
     <update id="updateSurveyTimeSetting" parameterType="SurveyModel">
@@ -27,20 +27,22 @@
         <result column="survey_type" property="surveyType" />
         <result column="creator" property="creator" />
         <result column="answer_title_num" property="answerTitleNum" />
+        <result column="score_scale" property="scoreScale"/>
         <result column="notes" property="notes" />
+        <result column="create_time" property="createTime" />
         <association property="submitCount" column="id" select="getSubmitsCountById" />
     </resultMap>
 
     <select id="queryAll" resultMap="associationSurveyModelMap">
-        select s.id,s.survey_name,s.survey_state,s.survey_type,s.creator,s.answer_title_num,s.notes from survey s
+        select s.id,s.survey_name,s.survey_state,s.survey_type,s.creator,s.answer_title_num,s.score_scale,s.notes,s.create_time from survey s
     </select>
 
     <select id="querySurveyListByCreator" resultMap="associationSurveyModelMap">
-        select id,survey_name,survey_state,survey_type,creator,answer_title_num,notes from survey where creator=#{creator}
+        select id,survey_name,survey_state,survey_type,creator,answer_title_num,score_scale,notes,create_time from survey where creator=#{creator} order by create_time
     </select>
 
     <select id="querySurveyListByCreatorAndType" resultMap="associationSurveyModelMap">
-        select id,survey_name,survey_state,survey_type,creator,answer_title_num,notes from survey where creator=#{creator}
+        select id,survey_name,survey_state,survey_type,creator,answer_title_num,score_scale,notes,create_time from survey where creator=#{creator}
         <choose>
             <when test='surveyType=="knowledge-competition"'>
                 and survey_type = #{surveyType}
@@ -49,6 +51,7 @@
                 and (survey_type = 'questionnaire' or survey_type is null )
             </otherwise>
         </choose>
+        order by create_time
     </select>
 
     <!--
@@ -66,21 +69,24 @@
         <result column="survey_type" property="surveyType" />
         <result column="creator" property="creator" />
         <result column="answer_title_num" property="answerTitleNum" />
+        <result column="score_scale" property="scoreScale"/>
         <result column="notes" property="notes" />
+        <result column="begin_date_time" property="beginDateTime" />
+        <result column="end_date_time" property="endDateTime" />
     </resultMap>
 
 
 
     <select id="queryById" parameterType="java.lang.String" resultMap="surveyModelMap">
-        SELECT id,survey_name,survey_state,survey_type,creator,answer_title_num,notes from survey where id=#{id}
+        SELECT id,survey_name,survey_state,survey_type,creator,answer_title_num,score_scale,notes,begin_date_time,end_date_time from survey where id=#{id}
     </select>
 
     <select id="queryByName" parameterType="java.lang.String"  resultMap="surveyModelMap">
-        SELECT id,survey_name ,survey_state,survey_type,creator,answer_title_num,notes from survey where survey_name=#{surveyName}
+        SELECT id,survey_name ,survey_state,survey_type,creator,answer_title_num,score_scale,notes,begin_date_time,end_date_time from survey where survey_name=#{surveyName}
     </select>
 
     <select id="queryByNameAndType" parameterType="java.lang.String"  resultMap="surveyModelMap">
-        SELECT id,survey_name ,survey_state,survey_type,creator,answer_title_num,notes from survey where survey_name=#{surveyName}
+        SELECT id,survey_name ,survey_state,survey_type,creator,answer_title_num,score_scale,notes,begin_date_time,end_date_time from survey where survey_name=#{surveyName}
         <choose>
             <when test='surveyType=="knowledge-competition"'>
                 and survey_type = #{surveyType}
@@ -92,12 +98,12 @@
     </select>
 
     <select id="queryBySurveyNameAndCreator" parameterType="java.lang.String"  resultMap="surveyModelMap">
-        SELECT id,survey_name,survey_state,survey_type,creator,answer_title_num,notes from survey where survey_name=#{surveyName} and creator=#{creator}
+        SELECT id,survey_name,survey_state,survey_type,creator,answer_title_num,score_scale,notes,begin_date_time,end_date_time from survey where survey_name=#{surveyName} and creator=#{creator}
 
     </select>
 
     <select id="queryBySurveyNameAndTypeAndCreator" parameterType="java.lang.String"  resultMap="surveyModelMap">
-        SELECT id,survey_name,survey_state,survey_type,creator,answer_title_num,notes from survey where survey_name=#{surveyName} and creator=#{creator}
+        SELECT id,survey_name,survey_state,survey_type,creator,answer_title_num,score_scale,notes,begin_date_time,end_date_time from survey where survey_name=#{surveyName} and creator=#{creator}
         <choose>
             <when test='surveyType=="knowledge-competition"'>
                 and survey_type = #{surveyType}

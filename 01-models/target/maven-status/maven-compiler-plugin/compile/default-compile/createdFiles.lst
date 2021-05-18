@@ -7,6 +7,7 @@ com\sg\survey\title\AnswerFlag.class
 com\sg\survey\SurveyTitleOptionSubmitModel.class
 com\sg\survey\SurveyType.class
 com\sg\survey\SurveyModel.class
+com\sg\survey\submit\SurveySubmitSummaryModel.class
 com\sg\survey\title\TextNameModel.class
 com\sg\survey\submit\SubmitSummaryModel.class
 com\sg\survey\title\option\OptionSummaryModel.class

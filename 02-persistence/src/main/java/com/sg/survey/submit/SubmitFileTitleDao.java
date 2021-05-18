@@ -5,13 +5,15 @@ import com.sg.survey.title.TitleModel;
 import java.util.List;
 
 public interface SubmitFileTitleDao {
-    public int insertSubmitFileTitle(SubmitFileTitleModel submitFileTitleModel);
 
-    public int insertSubmitFileTitleList(List<SubmitFileTitleModel> submitFileTitleModelList);
+    int insertSubmitFileTitle(SubmitFileTitleModel submitFileTitleModel);
 
-    public int deleteSubmitFileTitleBySubmitId(String submitId);
+    int insertSubmitFileTitleList(List<SubmitFileTitleModel> submitFileTitleModelList);
 
-    public int deleteSubmitFileByTitleId(List<TitleModel> titleModelList);
+    int deleteSubmitFileTitleBySubmitId(String submitId);
 
-    public List<SubmitFileTitleModel> querySubmitFileTitleListBySubmitId(String submitId);
+    int deleteSubmitFileByTitleId(List<TitleModel> titleModelList);
+
+    List<SubmitFileTitleModel> querySubmitFileTitleListBySubmitId(String submitId);
+
 }

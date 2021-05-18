@@ -4,6 +4,7 @@ import com.sg.survey.title.option.OptionDao;
 import com.sg.survey.title.option.OptionModel;
 import com.sg.survey.submit.*;
 import com.sg.survey.title.*;
+import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.util.DigestUtils;
@@ -40,10 +41,38 @@ import java.util.*;
         // 获取submitModel
         //getSurveySubmitList();
         //getTitlePage();
-        getTitleAnswerPage();
+        //getTitleAnswerPage();
+        //getSurveyTitleOptionModelById();
+        //getSurveySubmitSummaryList();
+        //getSurveyTitleOptionModel();
+        String textInput = "台湾";
+        String textAnswer = "台湾";
+        if(textInput.trim().indexOf(textAnswer.trim()) >= 0){
+            System.out.println("答案正确");
+        }
     }
 
+    private static void getSurveyTitleOptionModel(){
+        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("spring-dao.xml");
+        SurveyTitleOptionDao surveyTitleOptionDao = (SurveyTitleOptionDao) applicationContext.getBean("surveyTitleOptionDaoMapper");
+        SurveyTitleOptionModel<TitleStatisticsModel> surveyTitleOptionModel = surveyTitleOptionDao.getSurveyTitleOptionModel("55d57fa9-138a-42c8-b539-037ca3bd9669",SurveyResultType.Statistics.getType());
+        List<TitleStatisticsModel> titleList  = surveyTitleOptionModel.getTitleList();
+        for(TitleStatisticsModel titleModel : titleList){
+            System.out.println(titleModel.getTitle());
+        }
 
+    }
+    private static void getSurveySubmitSummaryList(){
+        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("spring-dao.xml");
+        SurveySubmitDao surveySubmitDao = (SurveySubmitDao) applicationContext.getBean("surveySubmitDaoMapper");
+        List<SurveySubmitSummaryModel> surveySubmitSummaryList = surveySubmitDao.getSurveySubmitSummaryList("55d57fa9-138a-42c8-b539-037ca3bd9669");
+    }
+
+    private static void getSurveyTitleOptionModelById(){
+        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("spring-dao.xml");
+        SurveyTitleOptionDao surveyTitleOptionDao = (SurveyTitleOptionDao) applicationContext.getBean("surveyTitleOptionDaoMapper");
+        SurveyTitleOptionModel surveyTitleOptionModel = surveyTitleOptionDao.getSurveyTitleOptionModelById("55d57fa9-138a-42c8-b539-037ca3bd9669");
+    }
 
     private static void getTitleCount(){
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("spring-dao.xml");

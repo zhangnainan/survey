@@ -11,21 +11,25 @@ import java.util.List;
  */
 public interface TitleService {
 
-    public Result getTextTitleModelList(String surveyId);
+    Result getTextTitleModelList(String surveyId);
 
-    public Result getTitleCount(String surveyId);
+    Result getTitleCount(String surveyId);
 
-    public Result getAllTitle(String surveyId);
+    Result getAllTitle(String surveyId);
 
-    public Result getTitlePage(String surveyId, String surveyType, int pageSize, int start);
+    Result getContestTitle(String surveyId, int answerTitleNum);
 
-    public Result saveTitleModel(TitleModel<OptionModel> titleModel);
+    Result getTitlePage(String surveyId, String surveyType, int pageSize, int start);
 
-    public Result saveTitleAndAnswerModelList(List<TitleModel<OptionModel>> titleModelList, List<AnswerModel> answerModelList);
+    Result saveTitleModel(TitleModel<OptionModel> titleModel);
 
-    public Result updateTitleModel(TitleModel<OptionModel> titleModel);
+    Result saveTitleAndAnswerModelList(List<TitleModel<OptionModel>> titleModelList, List<AnswerModel> answerModelList);
 
-    public Result deleteTitleModel(TitleModel<OptionModel> titleModel);
+    Result updateTitleModel(TitleModel<OptionModel> titleModel);
 
-    public Result getStartedTitleSequence(String surveyId);
+    Result deleteTitleModel(TitleModel<OptionModel> titleModel);
+
+    Result getStartedTitleSequence(String surveyId);
+
+
 }

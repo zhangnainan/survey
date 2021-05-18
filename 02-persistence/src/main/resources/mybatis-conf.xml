@@ -11,6 +11,7 @@
         <typeAlias type="com.sg.survey.title.SurveySingleTitleModel" alias="SurveySingleTitleModel"/>
         <typeAlias type="com.sg.survey.title.SurveyTitleModel" alias="SurveyTitleModel"/>
         <typeAlias type="com.sg.survey.submit.SurveySubmitModel" alias="SurveySubmitModel"/>
+        <typeAlias type="com.sg.survey.submit.SurveySubmitSummaryModel" alias="SurveySubmitSummaryModel" />
         <typeAlias type="com.sg.survey.submit.SubmitTitleModel" alias="SubmitTitleModel" />
         <typeAlias type="com.sg.survey.submit.SubmitSingleTitleModel" alias="SubmitSingleTitleModel"/>
         <typeAlias type="com.sg.survey.submit.SubmitMultipleTitleModel" alias="SubmitMultipleTitleModel"/>

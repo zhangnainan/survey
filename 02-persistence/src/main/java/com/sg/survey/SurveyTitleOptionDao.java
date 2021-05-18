@@ -2,6 +2,11 @@ package com.sg.survey;
 
 import com.sg.survey.submit.SubmitSummaryModel;
 import com.sg.survey.title.TitleInfoModel;
+import com.sg.survey.title.TitleModel;
+import com.sg.survey.title.TitleSummaryModel;
+import com.sg.survey.title.option.OptionModel;
+import org.apache.ibatis.annotations.Param;
+
 
 import java.util.List;
 
@@ -10,15 +15,17 @@ import java.util.List;
  */
 public interface SurveyTitleOptionDao {
 
-    public SurveyTitleOptionModel<TitleInfoModel> getSurveyTitleOptionModelById(String surveyId);
+    SurveyTitleOptionModel<TitleInfoModel> getSurveyTitleOptionModelById(String surveyId);
 
-    public SurveyTitleOptionStatisticsModel getSurveyStatistics(String surveyId);
+    SurveyTitleOptionModel getSurveyTitleOptionModel(@Param("surveyId") String surveyId,@Param("type") String type);
 
-    public SurveyTitleOptionSummaryModel getSurveySubmitSummary(String surveyId);
+    SurveyTitleOptionStatisticsModel getSurveyStatistics(String surveyId);
 
-    public List<SurveyTitleOptionSubmitModel> getSurveySubmitDetailList(String surveyId);
+    SurveyTitleOptionSummaryModel getSurveySubmitSummary(String surveyId);
 
-    public List<SubmitSummaryModel> getSubmitSummaryList(String surveyId);
+    List<SurveyTitleOptionSubmitModel> getSurveySubmitDetailList(String surveyId);
 
-    public int getSubmitsCount(String surveyId);
+    List<SubmitSummaryModel> getSubmitSummaryList(String surveyId);
+
+    int getSubmitsCount(String surveyId);
 }

@@ -17,10 +17,12 @@ public class SurveyModel {
     private String surveyType;
     private String creator;
     private int answerTitleNum;
+    private double scoreScale;
     private String notes;
     private String beginDateTime;
     private String endDateTime;
     private int submitCount;
+    private String createTime;
 
     public SurveyModel(){
 
@@ -82,6 +84,14 @@ public class SurveyModel {
         this.answerTitleNum = answerTitleNum;
     }
 
+    public double getScoreScale() {
+        return scoreScale;
+    }
+
+    public void setScoreScale(double scoreScale) {
+        this.scoreScale = scoreScale;
+    }
+
     public String getNotes() {
         return notes;
     }
@@ -113,4 +123,14 @@ public class SurveyModel {
     public void setSubmitCount(int submitCount) {
         this.submitCount = submitCount;
     }
+
+    public String getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(String createTime) {
+        this.createTime = createTime;
+    }
+
+
 }

@@ -12,25 +12,25 @@ import java.util.List;
  */
 public interface OptionDao {
 
-    public int insertOption(OptionModel optionModel);
+    int insertOption(OptionModel optionModel);
 
-    public int insertOptionList(List<OptionModel> optionModelList);
+    int insertOptionList(List<OptionModel> optionModelList);
 
-    public int deleteOptionModel(String optionId);
+    int deleteOptionModel(String optionId);
 
-    public int deleteOptionByTitleId(String titleId);
+    int deleteOptionByTitleId(String titleId);
 
-    public int deleteOptionByTitleIds(List<TitleModel> titleModelList);
+    int deleteOptionByTitleIds(List<TitleModel> titleModelList);
 
-    public int deleteOptionModelList(List<OptionModel> optionModelList);
+    int deleteOptionModelList(List<OptionModel> optionModelList);
 
-    public int updateOption(OptionModel optionModel);
+    int updateOption(OptionModel optionModel);
 
-    public int updateOptionList(List<OptionModel> optionModelList);
+    int updateOptionList(List<OptionModel> optionModelList);
 
-    public List<OptionModel> queryOptionListByTitleIds(List<SurveyTitleModel> surveyTitleModelList);
+    List<OptionModel> queryOptionListByTitleIds(List<SurveyTitleModel> surveyTitleModelList);
 
-    public List<SubmitOptionModel> querySubmitOptionList(@Param("optionId") String optionId,@Param("titleType") String titleType);
+    List<SubmitOptionModel> querySubmitOptionList(@Param("optionId") String optionId,@Param("titleType") String titleType);
 
 
 }

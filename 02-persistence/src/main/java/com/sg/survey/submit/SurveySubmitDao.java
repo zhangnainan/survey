@@ -9,17 +9,33 @@ import java.util.List;
  */
 public interface SurveySubmitDao {
 
-    public int insertSurveySubmit(SurveySubmitModel surveySubmitModel);
+    int insertSurveySubmit(SurveySubmitModel surveySubmitModel);
 
-    public int insertSurveySubmitList(List<SurveySubmitModel> surveySubmitModelList);
+    int insertSurveySubmitList(List<SurveySubmitModel> surveySubmitModelList);
 
-    public List<SurveySubmitModel> getSurveySubmitsById(String surveyId);
+    List<SurveySubmitModel> getSurveySubmitsById(String surveyId);
 
-    public List<SurveySubmitModel> getSurveySubmitsByIdAndWxNickname(@Param("surveyId") String surveyId,@Param("wxNickname") String wxNickname);
+    List<SurveySubmitModel> getContestRankPage(@Param("surveyId") String surveyId,@Param("pageSize") int pageSize,@Param("start") int start);
 
-    public List<SurveySubmitModel> getSurveySubmitsByIdAndWxOpenId(@Param("surveyId") String surveyId,@Param("wxOpenId") String wxOpenId);
+    List<SurveySubmitSummaryModel> getSurveySubmitSummaryList(String surveyId);
 
-    public int deleteSurveySubmitsBySurveyId(String surveyId);
+    List<SubmitTitleAnswerModel> getSubmitTitleAnswerListBySubmitIds(List<SurveySubmitSummaryModel> submitSummaryModels);
+    /**
+    List<SubmitTitleAnswerModel> getSubmitsSingleTitleAnswerList(List<SurveySubmitSummaryModel> submitSummaryModels);
 
-    public int deleteSurveySubmitById(String id);
+    List<SubmitTitleAnswerModel> getSubmitsMultipleTitleAnswerList(List<SurveySubmitSummaryModel> submitSummaryModels);
+
+    List<SubmitTitleAnswerModel> getSubmitsTextTitleAnswerList(List<SurveySubmitSummaryModel> submitSummaryModels);
+
+    List<SubmitTitleAnswerModel> getSubmitsFileTitleAnswerList(List<SurveySubmitSummaryModel> submitSummaryModels);
+    **/
+    int getSubmitCount(String surveyId);
+
+    List<SurveySubmitModel> getSurveySubmitsByIdAndWxNickname(@Param("surveyId") String surveyId,@Param("wxNickname") String wxNickname);
+
+    List<SurveySubmitModel> getSurveySubmitsByIdAndWxOpenId(@Param("surveyId") String surveyId,@Param("wxOpenId") String wxOpenId);
+
+    int deleteSurveySubmitsBySurveyId(String surveyId);
+
+    int deleteSurveySubmitById(String id);
 }

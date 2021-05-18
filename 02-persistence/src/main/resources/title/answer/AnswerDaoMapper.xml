@@ -22,6 +22,13 @@
         delete from title_answers where answer=#{answer}
     </delete>
 
+    <delete id="deleteAnswerByTitleIds" parameterType="java.util.List">
+
+        <foreach collection="list" open="" close="" separator=";" item="titleModel" index="index">
+            delete from title_answers where title_id=#{titleModel.id}
+        </foreach>
+    </delete>
+
     <delete id="deleteAnswerModelByTitleId" parameterType="java.lang.String">
         delete from title_answers where title_id=#{titleId}
     </delete>

@@ -7,5 +7,5 @@ import com.sg.survey.Result;
  */
 public interface OptionService {
 
-    public Result deleteOptionModel(String optionId,String titleType);
+    Result deleteOptionModel(String optionId,String titleType);
 }

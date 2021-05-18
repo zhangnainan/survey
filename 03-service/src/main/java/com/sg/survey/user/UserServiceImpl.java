@@ -20,19 +20,22 @@ public class UserServiceImpl implements UserService {
     public Result login(UserModel userModel) {
 
         Result result = new Result();
+        try{
+            if(Validator.isEmpty(userModel) || Validator.isEmpty(userModel.getUsername()) || Validator.isEmpty(userModel.getPassword())){
+                result.setMessage(Message.NotEmpty.getType());
+                return result;
+            }
+            userModel.setPassword(DigestUtils.md5DigestAsHex(userModel.getPassword().getBytes()));
+            UserModel loginUserModel = userDao.login(userModel);
 
-        if(Validator.isEmpty(userModel) || Validator.isEmpty(userModel.getUsername()) || Validator.isEmpty(userModel.getPassword())){
-            result.setMessage(Message.NotEmpty.getType());
-            return result;
-        }
-        userModel.setPassword(DigestUtils.md5DigestAsHex(userModel.getPassword().getBytes()));
-        UserModel loginUserModel = userDao.login(userModel);
-
-        if(!Validator.isEmpty(loginUserModel)){
-            result.setData(loginUserModel);
-            result.setMessage(Message.Success.getType());
-        }else{
-            result.setMessage(Message.NoExist.getType());
+            if(!Validator.isEmpty(loginUserModel)){
+                result.setData(loginUserModel);
+                result.setMessage(Message.Success.getType());
+            }else{
+                result.setMessage(Message.NoExist.getType());
+            }
+        }catch (Exception e){
+            e.printStackTrace();
         }
 
         return result;

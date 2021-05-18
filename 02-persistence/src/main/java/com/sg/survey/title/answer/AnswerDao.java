@@ -1,16 +1,20 @@
 package com.sg.survey.title.answer;
 
+import com.sg.survey.title.TitleModel;
+
 import java.util.List;
 
 public interface AnswerDao {
 
-    public int saveAnswerModelList(List<AnswerModel> answerModelList);
+    int saveAnswerModelList(List<AnswerModel> answerModelList);
 
-    public int deleteAnswerModelList(List<AnswerModel> answerModelList);
+    int deleteAnswerModelList(List<AnswerModel> answerModelList);
 
-    public int deleteAnswerModelByAnswer(String answer);
+    int deleteAnswerModelByAnswer(String answer);
 
-    public int deleteAnswerModelByTitleId(String titleId);
+    int deleteAnswerByTitleIds(List<TitleModel> titleModelList);
 
-    public int updateAnswerModelList(List<AnswerModel> updateAnswerModelList);
+    int deleteAnswerModelByTitleId(String titleId);
+
+    int updateAnswerModelList(List<AnswerModel> updateAnswerModelList);
 }

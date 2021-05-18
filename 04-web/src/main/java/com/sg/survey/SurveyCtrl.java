@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.microsoft.schemas.office.visio.x2012.main.CellType;
 import com.sg.survey.title.TitleInfoModel;
 import com.sg.survey.title.TitleModel;
+import com.sg.survey.title.option.OptionModel;
 import com.sg.survey.util.UploadUtil;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.config.RequestConfig;
@@ -81,7 +82,7 @@ public class SurveyCtrl{
     @ResponseBody
     @RequestMapping(value = "/load/survey",method = RequestMethod.GET,produces = "text/plain;charset=utf-8")
     public String loadSurvey(String surveyId, String wxNickname, String wxOpenId) throws UnsupportedEncodingException {
-        wxNickname = new String(wxNickname.getBytes("ISO-8859-1"),"UTF-8");
+        //wxNickname = new String(wxNickname.getBytes("ISO-8859-1"),"UTF-8");
         Result result = surveyService.getSurveyTitleOptionModel(surveyId,wxNickname,wxOpenId);
         String resultStr = JSON.toJSONString(result);
 
@@ -91,9 +92,25 @@ public class SurveyCtrl{
     @ResponseBody
     @RequestMapping(value = "/submit/survey",method = RequestMethod.POST,produces = "text/plain;charset=utf-8")
     public String submitSurveyTitleOptionModel(@RequestBody  SurveyTitleOptionModel<TitleInfoModel> survey, String wxNickname, String wxOpenId) throws UnsupportedEncodingException {
-        wxNickname = new String(wxNickname.getBytes("ISO-8859-1"),"UTF-8");
+        //wxNickname = new String(wxNickname.getBytes("ISO-8859-1"),"UTF-8");
         Result result = surveyService.submitSurveyTitleOptionModel(survey,wxNickname,wxOpenId);
         String resultStr = JSON.toJSONString(result);
+
+        return resultStr;
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/submit/contest",method = RequestMethod.POST,produces = "text/plain;charset=utf-8")
+    public String submitContest(@RequestBody List<TitleInfoModel> titleModelList,String surveyId,String submitter,String timeCount, String wxNickname, String wxOpenId) throws UnsupportedEncodingException {
+        String resultStr = "";
+        try{
+            //wxNickname = new String(wxNickname.getBytes("ISO-8859-1"),"UTF-8");
+            //submitter = new String(submitter.getBytes("ISO-8859-1"),"UTF-8");
+            Result result = surveyService.submitContestTitleList(titleModelList,surveyId,submitter,timeCount,wxNickname,wxOpenId);
+            resultStr = JSON.toJSONString(result);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
 
         return resultStr;
     }
@@ -102,10 +119,16 @@ public class SurveyCtrl{
     @RequestMapping(value = "/get/survey/summary",method = RequestMethod.GET,produces = "text/plain;charset=utf-8")
     public String getSurveySummary(String surveyId){
 
-        long beginTime = System.currentTimeMillis();
-        Result result = surveyService.getSurveySummary(surveyId);
+        Result result = new Result();
+        try {
+            //result = surveyService.getSurveySummary(surveyId);
+            result = surveyService.getSurveySummaryNew(surveyId);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
         String resultStr = JSON.toJSONString(result);
-        long endTime = System.currentTimeMillis();
+
         return resultStr;
     }
 
@@ -123,7 +146,13 @@ public class SurveyCtrl{
     @RequestMapping(value = "/get/survey/name/statistics",method = RequestMethod.GET,produces = "text/plain;charset=utf-8")
     public String getSurveyByNameStatistics(String surveyId,String titleId){
 
-        Result result = surveyService.getSurveyByNameStatistics(surveyId,titleId);
+        Result result = new Result();
+        try{
+            //result = surveyService.getSurveyByNameStatistics(surveyId,titleId);
+            result = surveyService.getSurveyByNameStatisticsNew(surveyId,titleId);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         String resultStr = JSON.toJSONString(result);
 
         return resultStr;
