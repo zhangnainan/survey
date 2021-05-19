@@ -300,8 +300,8 @@ public class SurveyCtrl{
         CloseableHttpResponse response = null;
 
         url.append("https://api.weixin.qq.com/sns/jscode2session")
-            .append("?appid=wx23c65ec205e7c1ca")
-            .append("&secret=8c8912176ed7668c9abe95bc2d1af776")
+            .append("?appid=yourselfappid")
+            .append("&secret=yourselfsecret")
             .append("&js_code=").append(code)
             .append("&grant_type=authorization_code")
             .append("&connect_redirect=1");
