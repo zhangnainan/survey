@@ -22,17 +22,6 @@
     <!-- 配置数据源 -->
     <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
 
-        <!--
-        <property name="driverClassName" value="com.mysql.jdbc.Driver"></property>
-        <property name="url" value="jdbc:mysql://47.115.56.106/questionnaire?useUnicode=true&amp;characterEncoding=utf-8&amp;allowMultiQueries=true"></property>
-        <property name="username" value="root"></property>
-        <property name="password" value="123456"></property>
-        -->
-
-        <property name="driverClassName" value="com.mysql.jdbc.Driver"></property>
-        <property name="url" value="jdbc:mysql://localhost/questionnaire?useUnicode=true&amp;characterEncoding=utf-8&amp;allowMultiQueries=true"></property>
-        <property name="username" value="root"></property>
-        <property name="password" value="123456"></property>
 
 
     </bean>
